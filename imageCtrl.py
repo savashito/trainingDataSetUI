@@ -55,11 +55,14 @@ def getImage(name,project,path=None,imageInfo=None):
 			print imageData
 			imageInfo = saveImage(project,imageData,name,readMetadata(filename))
 			# return None,None
+	# print "imageInfo "+imageInfo.src
+	# print "imageData "+str(imageData)
 	if(imageData==None):
 		directory = getImageDir(name,project)
 		filename = "{0}/{1}".format(directory,name)
 		imageData,name = imageUtil.loadImage(filename)
-		
+	# print "imageData "+str(imageData)
+
 	return imageData,imageInfo
 def getImageDir(name,project):
 	directory = project.outputImageFolder

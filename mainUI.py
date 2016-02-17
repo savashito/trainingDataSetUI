@@ -364,8 +364,13 @@ class MarsUI:
 	def imageSelected(self,event):
 		imageName = self.cbxImage.get()
 		imageInfo = self.images[imageName]
-		print event
-		print "selected "+
+		# print event +event.
+		self.imageData,self.imageInfo = imageCtrl.getImage(imageName,self.project,None,imageInfo)
+
+		self.updateImageDisplay()
+		# load crop combobox
+		# self.cbxImage 
+		print "selected "
 	def openImageDialog(self):
 		Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing "/Users/rodrigosavage/Documents/software/python/dbTutorial/marsML"
 		filename = askopenfilename(message="Load an image",initialdir=self.project.lastLoadedFolder) # show an "Open" dialog box and return the path to the selected file
@@ -382,15 +387,16 @@ class MarsUI:
 		self.imageData,self.imageInfo = imageCtrl.getImage(name,self.project,path)
 		
 		# self.img = imageUtil.loadImage('testImages/stinkbug.png')
-		plt.imshow(self.imageData)
-		self.canvas.show()
-
-		#Window changes
-		self.setImageName(self.imageInfo.src )
+		self.updateImageDisplay()
 		# contact db
 		
 		# path,name = filename.split(":")
 		# print "Path {0} name {1} ".format(path,name)
+	def updateImageDisplay(self):
+		plt.imshow(self.imageData)
+		self.canvas.show()
+		#Window changes
+		self.setImageName(self.imageInfo.src )
 	def add_patch(self,p):
 		self.ax.add_patch(p)
 	def getSelectedClass(self):
