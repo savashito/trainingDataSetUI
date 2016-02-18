@@ -5,6 +5,7 @@ import imageCtrl
 # saveCrop(self.project,self.imageInfo,self.imageData,(x,y,w,h))
 # Save crop, first queries imageInfo to figure out whats the next crop id.
 # creates a new crop
+
 def saveCrop(project,imageInfo,imageData,rec):
 	# find index of the next crop from the current image being cropped
 	i = Crop.select().where(Crop.originalImage == imageInfo.id).count()
@@ -30,6 +31,24 @@ def insertCrop(name,imageInfo,rec):
 		cropBottomRightY = rec[3]
 		)
 
+def retrieveCrops(project,image):
+	crops = Crop.select().where(Crop.originalImage==image.id)
+	l = []
+	listCrops = {}
+	for crop in crops:
+		l.append(crop.src)
+		listCrops[crop.src] = crop
+		# listCrops.append(image)
+	return l,listCrops
+def getCrop(project,parentImage,cropInfo):
+	# returns the crop image
+	name = parentImage.src
+	directory = imageCtrl.getImageDir(name,project)
+	filename = "{0}/{1}".format(directory,cropInfo.src)
+	print "loading "+filename
+	imageData,name = imageUtil.loadImage(filename)
+	
+	return imageData
 	'''
 	try:
 		Crop.create(src=name,

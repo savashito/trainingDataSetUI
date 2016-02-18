@@ -38,13 +38,17 @@ class Class(BaseModel):
 	# examples = ForeignKeyField(Example)
 
 class Example(BaseModel):
-	_class = ForeignKeyField(Class)	
-
-
+	_class = ForeignKeyField(Class)
+	src = CharField(unique=True)
+	parentCrop = ForeignKeyField(Crop)
+	topLeftX = IntegerField()
+	topLeftY = IntegerField()
+	bottomRightX = IntegerField()
+	bottomRightY = IntegerField()
 
 def initDB():
 	db.connect()
-	db.create_tables([Image,Project,Crop,Class],safe=True)
+	db.create_tables([Image,Project,Crop,Class,Example],safe=True)
 	print "Database Initialized"
 	return db
 	# listImages = createTestImages()

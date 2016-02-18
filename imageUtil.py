@@ -5,15 +5,17 @@ import os
 def loadImage(str):
 	image = cv2.imread(str)
 	# calc aspect ratio
+	names = str.split('/')
+	name = names[len(names)-1]
+	return image,name
+
+def loadImageForDisplay(str):
+	image,name = loadImage(str)
 	width = 600
 	r = width / image.shape[1]
 	dim = (width, int(image.shape[0] * r))
 	resized = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
-	# return mpimg.imread(str)
-	#cropped = resized[0:170, 0:540]
-	names = str.split('/')
-	name = names[len(names)-1]
-	return resized,name
+	return resize,name
 def cropImage(image,x,y,w,h):
 	if(w<0):
 		x = x + w

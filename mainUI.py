@@ -7,9 +7,11 @@ import matplotlib.pyplot as plt
 # load dbstuff
 from marsSchema import initDB
 import imageCtrl
+import imageUtil
 import cropCtrl
 from projectCtrl import getProject,updateLastLoadedFolder
 import classCtrl
+import exampleCtrl
 
 from matplotlib.backend_bases import cursors
 from matplotlib.widgets import Cursor
@@ -107,10 +109,28 @@ class TagSquare():
 			)
 		self.marsUI.add_patch(p)
 		return p
+	def getPatchRec(self,p):
+		w = p.get_width()
+		h = p.get_height()
+		x,y = p.xy
+		return [x,y,w,h]
 	def click(self,x,y):
 		if(self.tagIndex==1):
 			if(self.marsUI.getSelectedClass()!= None):
-				print " tagged "+self.marsUI.getSelectedClass().name
+				taggedClass = self.marsUI.getSelectedClass()
+				print taggedClass.name
+				rec1 = self.getPatchRec(self.p1)
+				rec2 = self.getPatchRec(self.p2)
+				rec3 = self.getPatchRec(self.p3)
+				rec4 = self.getPatchRec(self.p4)
+				self.marsUI.saveExample(taggedClass,rec1)
+				self.marsUI.saveExample(taggedClass,rec2)
+				self.marsUI.saveExample(taggedClass,rec3)
+				self.marsUI.saveExample(taggedClass,rec4)
+				
+				# print " tagged "+self.marsUI.getSelectedClass().name
+				
+				# 
 			# self.endTag()
 	def notTagging(self,x,y):
 		return
@@ -219,7 +239,7 @@ class OnHover(object):
 		elif(event.button==1):
 			self.sqr.click(event.xdata, event.ydata)
 			self.tagSqr.click(event.xdata, event.ydata)
-		else:
+		elif(event.xdata!=None):
 			self.sqr.move(self.canvas,event.xdata, event.ydata)
 			self.tagSqr.move(event.xdata, event.ydata)
 		self.marsUI.redraw()
@@ -268,7 +288,7 @@ class MarsUI:
 		# class dropdowns
 		self.cbxClass = self.addCombobox()
 		self.cbxImage = self.addCombobox(self.imageSelected)
-		self.cbxCrop = self.addCombobox()
+		self.cbxCrop = self.addCombobox(self.cropSelected)
 
 		self.lblTagImageText = StringVar()
 		self.btnTagImage = Button(master, textvariable=self.lblTagImageText, command=self.tagImage)
@@ -329,6 +349,16 @@ class MarsUI:
 
 		self.lblClassBackground.grid(row=10, column=0,sticky=W,pady=10)
 		self.lblClass.grid(row=11, column=0,sticky=W)
+		# clean variables
+		self.cropInfo,self.cropData,self.imageInfo,self.imageData = None,None,None,None
+		self.crops={}
+	def saveExample(self,taggedClass,rec):
+		# need to crop image
+		if(self.cropInfo!=None):
+			tagData = imageUtil.cropImage(self.cropData,rec[0],rec[1],rec[2],rec[3])
+			exampleCtrl.saveExample(taggedClass,self.project,self.cropInfo,rec,tagData)
+
+
 	def addCombobox(self,fn=None):
 		cbxClass = ttk.Combobox(self.master,width=10)
 		cbxClass.state(['readonly'])
@@ -338,6 +368,9 @@ class MarsUI:
 	def updateCbxImages(self):
 		self.cbxImagesKey,self.images = imageCtrl.retrieveImages(self.project)# ['crater', 'cone', 'background']
 		self.cbxImage['values'] = self.cbxImagesKey
+	def updateCbxCrop(self,image):
+		self.cbxCropKey,self.crops = cropCtrl.retrieveCrops(self.project,image)# ['crater', 'cone', 'background']
+		self.cbxCrop['values'] = self.cbxCropKey
 	def updateFields(self):
 		self.setImageName("")
 		self.cbxClassValues,self.classes = classCtrl.listClassesName(self.project)# ['crater', 'cone', 'background']
@@ -364,28 +397,43 @@ class MarsUI:
 	def imageSelected(self,event):
 		imageName = self.cbxImage.get()
 		imageInfo = self.images[imageName]
-		# print event +event.
 		self.imageData,self.imageInfo = imageCtrl.getImage(imageName,self.project,None,imageInfo)
-
 		self.updateImageDisplay()
 		# load crop combobox
+		self.updateCbxCrop(imageInfo)
 		# self.cbxImage 
 		print "selected "
-	def openImageDialog(self):
-		Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing "/Users/rodrigosavage/Documents/software/python/dbTutorial/marsML"
-		filename = askopenfilename(message="Load an image",initialdir=self.project.lastLoadedFolder) # show an "Open" dialog box and return the path to the selected file
+	def cropSelected(self,event):
+		cropName = self.cbxCrop.get()
+		cropInfo = self.crops[cropName]
+		print "SelectedCrop "+cropInfo.src
+		self.cropData = cropCtrl.getCrop(self.project,self.imageInfo,cropInfo)
+		self.cropInfo = cropInfo
+		self.updateCropDisplay()
+		# load crop combobox
+		# self.updateCbxCrop(imageInfo)
+	def getPathAndName(self,filename):
 		path = filename.split("/")
 		name = path[len(path)-1]
 		print path
-		path = "/".join(path)
+		path = "/".join(path[0:len(path)-1])
+		return path,name
+	def openImageDialog(self):
+		Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing "/Users/rodrigosavage/Documents/software/python/dbTutorial/marsML"
+		filename = askopenfilename(message="Load an image",initialdir=self.project.lastLoadedFolder) # show an "Open" dialog box and return the path to the selected file
+		# print filename
+		if(filename==None or filename == ""):
+			return
+		path,name = self.getPathAndName(filename)
 		
 		print "name: "+name
 		print "path "+path
+
 		# DB project changes
 		updateLastLoadedFolder(self.project,path)
 		# DB save image or check existance
 		self.imageData,self.imageInfo = imageCtrl.getImage(name,self.project,path)
-		
+		print self.imageData
 		# self.img = imageUtil.loadImage('testImages/stinkbug.png')
 		self.updateImageDisplay()
 		# contact db
@@ -397,6 +445,11 @@ class MarsUI:
 		self.canvas.show()
 		#Window changes
 		self.setImageName(self.imageInfo.src )
+	def updateCropDisplay(self):
+		plt.imshow(self.cropData)
+		self.canvas.show()
+		#Window changes
+		self.setImageName(self.cropInfo.src )
 	def add_patch(self,p):
 		self.ax.add_patch(p)
 	def getSelectedClass(self):
@@ -424,8 +477,9 @@ class MarsUI:
 		plt.imshow(self.cropImg)
 		# self.img = cropImg
 		self.canvas.show()
-		# update the db
 
+		# update the db
+		self.crops[self.cropInfo.src]=self.cropInfo
 		print "Crop image"
 	def setClassNumber(self,number):
 		self.lblClassText.set("{0}: {1}".format("Crater",str(number)))

@@ -15,9 +15,13 @@ def listClassesName(project):
 		l.append(p.name)
 		classes[p.name]=p
 	return l,classes
-initDB()
-cratersProject = getProject("Craters")
+
+def getClass(name):
+	return Class.select().where(Class.name == name).get()
+
+# initDB()
+# cratersProject = getProject("Craters")
 # insertClass("craters",cratersProject)
 
-l = listClassesName(cratersProject)
-print l
+# l = listClassesName(cratersProject)
+# print l
