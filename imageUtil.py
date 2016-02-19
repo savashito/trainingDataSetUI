@@ -23,6 +23,7 @@ def cropImage(image,x,y,w,h):
 	if(h<0):
 		y = y +h
 		h=-h
+	print "Crop image {0} {1} {2} {3} ".format(x,y,w,h)
 	return image[y:(y+h),x:(x+w)]
 
 def saveImage(img,src,directory):

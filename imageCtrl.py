@@ -52,7 +52,7 @@ def getImage(name,project,path=None,imageInfo=None):
 			filename = "{0}/{1}".format(path,name)
 			print filename
 			imageData,name = imageUtil.loadImage(filename)
-			print imageData
+			# print imageData
 			imageInfo = saveImage(project,imageData,name,readMetadata(filename))
 			# return None,None
 	# print "imageInfo "+imageInfo.src
@@ -61,6 +61,8 @@ def getImage(name,project,path=None,imageInfo=None):
 		directory = getImageDir(name,project)
 		filename = "{0}/{1}".format(directory,name)
 		imageData,name = imageUtil.loadImage(filename)
+		# imageData,name = imageUtil.loadImageForDisplay(filename)
+		
 	# print "imageData "+str(imageData)
 
 	return imageData,imageInfo

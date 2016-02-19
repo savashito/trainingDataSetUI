@@ -18,6 +18,7 @@ from matplotlib.widgets import Cursor
 import matplotlib.backends.backend_tkagg as tkagg
 import matplotlib.patches as patches
 import math
+from overlawManager import OverlayManager
 
 def getLen(x):
 	return x[1]-x[0]
@@ -84,6 +85,12 @@ class Square():
 		self.marsUI.crop(self.x,self.y ,self.w,self.h)
 		self.cropIndex = 0
 
+def isInt(s):
+    try: 
+        int(s)
+        return True
+    except ValueError:
+        return False
 class TagSquare():
 	def __init__(self,marsUI):
 		self.marsUI = marsUI
@@ -97,8 +104,11 @@ class TagSquare():
 		self.scaleX,self.scaleY = 0.1,0.1
 		self.setVisibilityPatch(False)
 		self.ang = math.pi/4
-		
+		self.sizesPatch = [16,32,64,128]
+		self.displaySize = 0
 		self.scaleIncrement = 0.01
+		self.x,self.y = 0,0
+		self.w,self.h = 0,0
 	def addPatch(self):
 		p = patches.Rectangle(
 			(0,0),   # (x,y)
@@ -119,14 +129,18 @@ class TagSquare():
 			if(self.marsUI.getSelectedClass()!= None):
 				taggedClass = self.marsUI.getSelectedClass()
 				print taggedClass.name
-				rec1 = self.getPatchRec(self.p1)
-				rec2 = self.getPatchRec(self.p2)
-				rec3 = self.getPatchRec(self.p3)
-				rec4 = self.getPatchRec(self.p4)
-				self.marsUI.saveExample(taggedClass,rec1)
-				self.marsUI.saveExample(taggedClass,rec2)
-				self.marsUI.saveExample(taggedClass,rec3)
-				self.marsUI.saveExample(taggedClass,rec4)
+				# save each size 
+				for size in self.sizesPatch:
+					self.scalePatch(size,size)
+					self.movePatch(x,y,True)
+					rec1 = self.getPatchRec(self.p1)
+					rec2 = self.getPatchRec(self.p2)
+					rec3 = self.getPatchRec(self.p3)
+					rec4 = self.getPatchRec(self.p4)
+					self.marsUI.saveExample(taggedClass,rec1)
+					self.marsUI.saveExample(taggedClass,rec2)
+					self.marsUI.saveExample(taggedClass,rec3)
+					self.marsUI.saveExample(taggedClass,rec4)
 				
 				# print " tagged "+self.marsUI.getSelectedClass().name
 				
@@ -138,8 +152,9 @@ class TagSquare():
 		print "tagging {0} {1}".format(x,y)
 		if(x == None):
 			return
-		w,h = self.marsUI.getCanvasDimensions()
-		self.scalePatch(self.scaleX*w,self.scaleY*h)
+		# w,h = self.marsUI.getCanvasDimensions()
+		# self.scalePatch(self.scaleX*w,self.scaleY*h)
+		self.scalePatch(self.sizesPatch[self.displaySize],self.sizesPatch[self.displaySize])
 		self.movePatch(x,y,True)
 		return
 	def move(self,x,y):
@@ -174,7 +189,13 @@ class TagSquare():
 		self.x,self.y = x,y
 	def keyEvent(self,key):
 		print key
-		if(key == 'q'):
+		if(isInt(key)):
+			n = min(int(key),4)-1
+			n = max(n,0)
+			self.displaySize = n
+			x,y = self.x ,self.y 
+			self.move(x,y)
+		elif(key == 'q'):
 			self.ang += (math.pi/32.0)
 			x,y = self.x ,self.y 
 			self.movePatch(x,y)
@@ -195,6 +216,8 @@ class TagSquare():
 			x,y = self.x ,self.y 
 			self.scaleX,self.scaleY = self.scaleX-self.scaleIncrement,self.scaleY-self.scaleIncrement
 			self.taggingCursor(x,y)
+		elif(key =="escape"):
+			self.endTag()
 			# w,h = self.marsUI.getCanvasDimensions()
 			# self.scalePatch(self.scaleX*w,self.scaleY*h)
 
@@ -207,6 +230,7 @@ class TagSquare():
 		else:
 			selectedClass = self.marsUI.getSelectedClass()
 			if(selectedClass!=None):
+				self.endTag()
 				self.marsUI.setTextTagButton("Tag "+selectedClass.name)
 			else:
 				self.endTag()
@@ -239,6 +263,7 @@ class OnHover(object):
 		elif(event.button==1):
 			self.sqr.click(event.xdata, event.ydata)
 			self.tagSqr.click(event.xdata, event.ydata)
+			self.marsUI.overlayManager.click(event.xdata, event.ydata)
 		elif(event.xdata!=None):
 			self.sqr.move(self.canvas,event.xdata, event.ydata)
 			self.tagSqr.move(event.xdata, event.ydata)
@@ -246,7 +271,7 @@ class OnHover(object):
 	def crop(self):
 		self.sqr.startCrop()
 	def tag(self):
-		print "taggg"
+		# print "taggg"
 		self.tagSqr.startTag()
 		'''
 		if(event.button==1):
@@ -351,7 +376,9 @@ class MarsUI:
 		self.lblClass.grid(row=11, column=0,sticky=W)
 		# clean variables
 		self.cropInfo,self.cropData,self.imageInfo,self.imageData = None,None,None,None
+		self.cbxCropKey = []
 		self.crops={}
+		self.overlayManager = OverlayManager(self)
 	def saveExample(self,taggedClass,rec):
 		# need to crop image
 		if(self.cropInfo!=None):
@@ -397,19 +424,32 @@ class MarsUI:
 	def imageSelected(self,event):
 		imageName = self.cbxImage.get()
 		imageInfo = self.images[imageName]
-		self.imageData,self.imageInfo = imageCtrl.getImage(imageName,self.project,None,imageInfo)
+		if(self.imageInfo != None and imageName==self.imageInfo.src):
+			print "cache the image"
+		else:
+			self.imageData,self.imageInfo = imageCtrl.getImage(imageName,self.project,None,imageInfo)
 		self.updateImageDisplay()
 		# load crop combobox
 		self.updateCbxCrop(imageInfo)
 		# self.cbxImage 
 		print "selected "
+		# unload crop
+		cropName,cropInfo,cropData = None,None,None
+		# show overlaw
+		self.OverlawCrops()
 	def cropSelected(self,event):
 		cropName = self.cbxCrop.get()
 		cropInfo = self.crops[cropName]
+		self.loadCrop(cropInfo)
+	def loadCrop(self,cropInfo):
 		print "SelectedCrop "+cropInfo.src
+		self.cbxCrop.set(cropInfo.src)
 		self.cropData = cropCtrl.getCrop(self.project,self.imageInfo,cropInfo)
 		self.cropInfo = cropInfo
 		self.updateCropDisplay()
+		self.overlayManager.setVisible(False)
+		# draw crops only visible on this crop
+		self.overlayManager.drawOverlawsOnCrop(self.cropInfo,self.crops)
 		# load crop combobox
 		# self.updateCbxCrop(imageInfo)
 	def getPathAndName(self,filename):
@@ -433,11 +473,23 @@ class MarsUI:
 		updateLastLoadedFolder(self.project,path)
 		# DB save image or check existance
 		self.imageData,self.imageInfo = imageCtrl.getImage(name,self.project,path)
-		print self.imageData
+		# print self.imageData
 		# self.img = imageUtil.loadImage('testImages/stinkbug.png')
 		self.updateImageDisplay()
 		# contact db
-		
+	def OverlawCrops(self):
+		if(self.imageInfo!=None):
+			# Extract crops
+			if(self.crops == {}):
+				self.cbxCropKey,self.crops = cropCtrl.retrieveCrops(self.project,image)
+			# self.overlayManager.setNumberOfOverlaws(len(self.crops))
+			self.overlayManager.drawOverlaws(self.crops)
+				# print crop
+				# print crop.cropTopLeftX
+				# print crop.cropTopLeftY
+				# print crop.cropBottomRightX
+				# print crop.cropBottomRightY
+
 		# path,name = filename.split(":")
 		# print "Path {0} name {1} ".format(path,name)
 	def updateImageDisplay(self):
@@ -471,7 +523,14 @@ class MarsUI:
 		x = int(x)
 		y = int(y)
 		print "Crop {0} {1} {2} {3} ".format(x,y,w,h)
-		self.cropImg,self.cropInfo = cropCtrl.saveCrop(self.project,self.imageInfo,self.imageData,(x,y,w,h))
+		# is the user cropping a crop
+		if(self.cropInfo):
+			# crop the crop by translating the points to the crop coordinate system
+			x = self.cropInfo.cropTopLeftX+x
+			y = self.cropInfo.cropTopLeftY+y
+			self.cropImg,self.cropInfo = cropCtrl.saveCrop(self.project,self.imageInfo,self.imageData,(x,y,w,h))
+		else:
+			self.cropImg,self.cropInfo = cropCtrl.saveCrop(self.project,self.imageInfo,self.imageData,(x,y,w,h))
 
 		# imageUtil.cropImage(self.img,x,y,w,h)
 		plt.imshow(self.cropImg)
@@ -480,6 +539,9 @@ class MarsUI:
 
 		# update the db
 		self.crops[self.cropInfo.src]=self.cropInfo
+		# add crop to combo
+		self.cbxCropKey.append(self.cropInfo.src)
+		self.cbxCrop['values'] = self.cbxCropKey
 		print "Crop image"
 	def setClassNumber(self,number):
 		self.lblClassText.set("{0}: {1}".format("Crater",str(number)))
