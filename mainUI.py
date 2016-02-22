@@ -488,16 +488,18 @@ class MarsUI:
 		self.cropData = cropCtrl.getCrop(self.project,self.imageInfo,cropInfo)
 		self.cropInfo = cropInfo
 		self.updateCropDisplay()
-		# self.overlayManager.setVisible(False)
+		# df
+		self.overlayManager.setVisible(False)
 		# self.tagOverlayManager.setVisible(False)
 		# draw crops only visible on this crop
-		# self.overlayManager.drawOverlawsOnCrop(self.cropInfo,self.crops)
+		self.overlayManager.drawOverlawsOnCrop(self.cropInfo,self.crops)
 		# self.overlayManager.drawOverlawsOnCrop(self.cropInfo,self.crops)
 		# self.tagOverlayManager.drawOverlawsOnCrop(self.cropInfo,self.examples)
 		# load crop combobox
 		# self.updateCbxCrop(imageInfo)
 		# draw examples 
 		# self.examples = 
+		# cropsNames, self.crops = cropCtrl.retrieveCrops(self.project,self.imageInfo)
 		examplesNames, self.examples = exampleCtrl.retriveExamples(self.project,self.getSelectedClass(),cropInfo)
 		# only draw the overlays the craters inside the overlay
 		# self.tagOverlayManager.drawOverlaws(self.examples)
