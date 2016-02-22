@@ -19,10 +19,31 @@ import matplotlib.backends.backend_tkagg as tkagg
 import matplotlib.patches as patches
 import math
 from overlawManager import OverlayManager
+from overlawManager import TagOverlayManager
 
 def getLen(x):
 	return x[1]-x[0]
 
+
+class Lock():
+	def __init__(self):
+		self.lock = False
+		self.whoHasTheLock = None
+	def adquire(self,who):
+		print 'Trying to adquire '+who
+		lockAvailable = (self.lock==False)
+		if(lockAvailable):
+			self.whoHasTheLock = who
+			self.lock = True
+			print "lock adquire "+who 
+		if(self.whoHasTheLock == who):
+			print "I have it "+who
+			return True
+		print "I dont have it "+ who+ " "+str(lockAvailable)
+		return lockAvailable
+	def release(self,):
+		print "lock release"
+		self.lock = False
 class Square():
 	def __init__(self,marsUI,ax,x,y,w,h):
 		p = patches.Rectangle(
@@ -73,17 +94,25 @@ class Square():
 		self.w,self.h = w,h
 		self.patch.set_width(w)
 		self.patch.set_height(h)
-	def click(self,x,y):
+	def click(self,x,y,lock):
+		if(lock.adquire('Square')==False):
+			return
+
+		# store the lock
+		self.lock = lock
 		if(self.cropIndex==1):
 			self.x,self.y = x,y
 			self.cropIndex = 2
 		elif(self.cropIndex==2):
 			self.endCrop()
+		else:
+			lock.release()
 	def startCrop(self):
 		self.cropIndex = 1
 	def endCrop(self):
 		self.marsUI.crop(self.x,self.y ,self.w,self.h)
 		self.cropIndex = 0
+		self.lock.release()
 
 def isInt(s):
     try: 
@@ -124,7 +153,10 @@ class TagSquare():
 		h = p.get_height()
 		x,y = p.xy
 		return [x,y,w,h]
-	def click(self,x,y):
+	def click(self,x,y,lock):
+		# check if someone has the lock
+		if(lock.adquire('TagSquare')==False):
+			return
 		if(self.tagIndex==1):
 			if(self.marsUI.getSelectedClass()!= None):
 				taggedClass = self.marsUI.getSelectedClass()
@@ -143,7 +175,7 @@ class TagSquare():
 					self.marsUI.saveExample(taggedClass,rec4)
 				
 				# print " tagged "+self.marsUI.getSelectedClass().name
-				
+		lock.release()
 				# 
 			# self.endTag()
 	def notTagging(self,x,y):
@@ -252,6 +284,7 @@ class OnHover(object):
 		self.sqr = Square(marsUI,ax,0.1,0.1,0.4,0.4)
 		self.tagSqr = TagSquare(marsUI)
 		self.marsUI = marsUI
+		self.clickLock = Lock()
 	def __call__(self, event):
 		self.canvas._tkcanvas.focus_set()
 		# self.canvas.takefocus = True
@@ -261,9 +294,9 @@ class OnHover(object):
 
 		# print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(event.button, event.x, event.y, event.xdata, event.ydata)
 		elif(event.button==1):
-			self.sqr.click(event.xdata, event.ydata)
-			self.tagSqr.click(event.xdata, event.ydata)
-			self.marsUI.overlayManager.click(event.xdata, event.ydata)
+			self.sqr.click(event.xdata, event.ydata,self.clickLock)
+			self.tagSqr.click(event.xdata, event.ydata,self.clickLock)
+			self.marsUI.overlayManager.click(event.xdata, event.ydata,self.clickLock)
 		elif(event.xdata!=None):
 			self.sqr.move(self.canvas,event.xdata, event.ydata)
 			self.tagSqr.move(event.xdata, event.ydata)
@@ -378,7 +411,9 @@ class MarsUI:
 		self.cropInfo,self.cropData,self.imageInfo,self.imageData = None,None,None,None
 		self.cbxCropKey = []
 		self.crops={}
+		self.examples = {}
 		self.overlayManager = OverlayManager(self)
+		self.tagOverlayManager = TagOverlayManager(self)
 	def saveExample(self,taggedClass,rec):
 		# need to crop image
 		if(self.cropInfo!=None):
@@ -435,23 +470,37 @@ class MarsUI:
 		print "selected "
 		# unload crop
 		cropName,cropInfo,cropData = None,None,None
+		self.tagOverlayManager.setVisible(False)
 		# show overlaw
 		self.OverlawCrops()
 	def cropSelected(self,event):
 		cropName = self.cbxCrop.get()
 		cropInfo = self.crops[cropName]
 		self.loadCrop(cropInfo)
+		# if(self.examples == {}):
+			# sex
+
+
+
 	def loadCrop(self,cropInfo):
 		print "SelectedCrop "+cropInfo.src
 		self.cbxCrop.set(cropInfo.src)
 		self.cropData = cropCtrl.getCrop(self.project,self.imageInfo,cropInfo)
 		self.cropInfo = cropInfo
 		self.updateCropDisplay()
-		self.overlayManager.setVisible(False)
+		# self.overlayManager.setVisible(False)
+		# self.tagOverlayManager.setVisible(False)
 		# draw crops only visible on this crop
-		self.overlayManager.drawOverlawsOnCrop(self.cropInfo,self.crops)
+		# self.overlayManager.drawOverlawsOnCrop(self.cropInfo,self.crops)
+		# self.overlayManager.drawOverlawsOnCrop(self.cropInfo,self.crops)
+		# self.tagOverlayManager.drawOverlawsOnCrop(self.cropInfo,self.examples)
 		# load crop combobox
 		# self.updateCbxCrop(imageInfo)
+		# draw examples 
+		# self.examples = 
+		examplesNames, self.examples = exampleCtrl.retriveExamples(self.project,self.getSelectedClass(),cropInfo)
+		# only draw the overlays the craters inside the overlay
+		# self.tagOverlayManager.drawOverlaws(self.examples)
 	def getPathAndName(self,filename):
 		path = filename.split("/")
 		name = path[len(path)-1]
@@ -484,6 +533,7 @@ class MarsUI:
 				self.cbxCropKey,self.crops = cropCtrl.retrieveCrops(self.project,image)
 			# self.overlayManager.setNumberOfOverlaws(len(self.crops))
 			self.overlayManager.drawOverlaws(self.crops)
+
 				# print crop
 				# print crop.cropTopLeftX
 				# print crop.cropTopLeftY
@@ -522,6 +572,13 @@ class MarsUI:
 		h = int(h)
 		x = int(x)
 		y = int(y)
+		# transform w,h to positive space
+		if(w<0):
+			x = x + w
+			w = -w
+		if(h<0):
+			y = y +h
+			h=-h
 		print "Crop {0} {1} {2} {3} ".format(x,y,w,h)
 		# is the user cropping a crop
 		if(self.cropInfo):
@@ -534,6 +591,9 @@ class MarsUI:
 
 		# imageUtil.cropImage(self.img,x,y,w,h)
 		plt.imshow(self.cropImg)
+
+		self.overlayManager.setVisible(False)
+		self.TagOverlayManager.setVisible(False)
 		# self.img = cropImg
 		self.canvas.show()
 

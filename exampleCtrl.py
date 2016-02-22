@@ -1,5 +1,6 @@
 
 from marsSchema import Example
+from overlawManager import SmallCrop
 import imageUtil
 def insertExample(_class,parentImageInfo,name,rec):
 	return Example.create(
@@ -44,3 +45,30 @@ def listExamples(_class):
 		l.append(name)
 		listExamples[name] = example
 	return l,listExamples
+
+def retriveExamples(project,_class,cropInfo):
+	examples = Example.select().where(Example._class == _class and Example.parentCrop == cropInfo)
+	l = []
+	listCrops = {}
+	try :
+		for example in examples:
+			l.append(example.src)
+			listCrops[example.src] = SmallCrop(example.topLeftX,example.topLeftY,example.bottomRightX,example.bottomRightY,example.src)
+		
+		# print examples.count()
+		# print len(examples)
+	except Exception as e:
+		print "No craters here"
+		print e
+	return l,listCrops
+
+	# print examples
+	# # if(examples==None):
+	# # 	print "None"
+	# # 	return
+	# for example in examples:
+	# 	name = example.src
+	# 	print name
+
+
+

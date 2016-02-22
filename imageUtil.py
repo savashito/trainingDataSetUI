@@ -17,12 +17,6 @@ def loadImageForDisplay(str):
 	resized = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
 	return resize,name
 def cropImage(image,x,y,w,h):
-	if(w<0):
-		x = x + w
-		w = -w
-	if(h<0):
-		y = y +h
-		h=-h
 	print "Crop image {0} {1} {2} {3} ".format(x,y,w,h)
 	return image[y:(y+h),x:(x+w)]
 
