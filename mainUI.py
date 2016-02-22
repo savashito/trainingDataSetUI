@@ -477,8 +477,6 @@ class MarsUI:
 		cropName = self.cbxCrop.get()
 		cropInfo = self.crops[cropName]
 		self.loadCrop(cropInfo)
-		# if(self.examples == {}):
-			# sex
 
 
 
@@ -502,7 +500,7 @@ class MarsUI:
 		# cropsNames, self.crops = cropCtrl.retrieveCrops(self.project,self.imageInfo)
 		examplesNames, self.examples = exampleCtrl.retriveExamples(self.project,self.getSelectedClass(),cropInfo)
 		# only draw the overlays the craters inside the overlay
-		# self.tagOverlayManager.drawOverlaws(self.examples)
+		self.tagOverlayManager.drawOverlaws(self.examples)
 	def getPathAndName(self,filename):
 		path = filename.split("/")
 		name = path[len(path)-1]
@@ -595,7 +593,7 @@ class MarsUI:
 		plt.imshow(self.cropImg)
 
 		self.overlayManager.setVisible(False)
-		self.TagOverlayManager.setVisible(False)
+		self.tagOverlayManager.setVisible(False)
 		# self.img = cropImg
 		self.canvas.show()
 
