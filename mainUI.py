@@ -425,16 +425,23 @@ class MarsUI:
 		# but should extract the example from the original image instead of the cropped image
 		# but also restrict tag to be on crop images only
 		if(self.cropInfo!=None):
-			# translating the points to the crop coordinate system
-			x = self.cropInfo.cropTopLeftX+rec[0]
-			y = self.cropInfo.cropTopLeftY+rec[1]
+			# translating the points to the image coordinate system
+			tx = self.cropInfo.cropTopLeftX
+			ty = self.cropInfo.cropTopLeftY
+			rec[0] = tx+rec[0] 
+			rec[1] = ty+rec[1] 
+			x = rec[0]
+			y = rec[1]
 			tagData = imageUtil.cropImage(self.imageData,x,y,rec[2],rec[3])
 			# tagData = imageUtil.cropImage(self.cropData,rec[0],rec[1],rec[2],rec[3])
 			example = exampleCtrl.saveExample(taggedClass,self.project,self.imageInfo,rec,tagData)
+			# translate back to crop space
 			example = SmallCrop(example.topLeftX,example.topLeftY,example.bottomRightX,example.bottomRightY,example.src)
 			# display the newly crop on the front end
 			self.examples[example.src]=example
-			self.tagOverlayManager.drawOverlaws(self.examples)
+			# self.tagOverlayManager.drawOverlaws(self.examples)
+			self.tagOverlayManager.drawOverlawsOnCrop(self.cropInfo,self.examples)
+
 
 	def addCombobox(self,fn=None):
 		cbxClass = ttk.Combobox(self.master,width=10)
@@ -493,10 +500,10 @@ class MarsUI:
 		cropInfo = self.crops[cropName]
 		self.loadCrop(cropInfo)
 
-
+# cghf
 
 	def loadCrop(self,cropInfo):
-		print "SelectedCrop "+cropInfo.src
+		print "\t--> SelectedCrop {0} {1} {2}".format(cropInfo.src,cropInfo.cropTopLeftX,cropInfo.cropTopLeftY)
 		self.cbxCrop.set(cropInfo.src)
 		self.cropData = cropCtrl.getCrop(self.project,self.imageInfo,cropInfo)
 		self.cropInfo = cropInfo
@@ -513,9 +520,13 @@ class MarsUI:
 		# draw examples 
 		# self.examples = 
 		# cropsNames, self.crops = cropCtrl.retrieveCrops(self.project,self.imageInfo)
-		examplesNames, self.examples = exampleCtrl.retriveExamples(self.project,self.getSelectedClass(),cropInfo)
+		examplesNames, self.examples = exampleCtrl.retriveExamples(self.project,self.getSelectedClass(),self.imageInfo)
+		print 'examples names '+str(examplesNames)
+		# we are missing transformation
+		# examplesNames, self.examples = exampleCtrl.retriveExamples(self.project,self.getSelectedClass(),cropInfo)
 		# only draw the overlays the craters inside the overlay
-		self.tagOverlayManager.drawOverlaws(self.examples)
+		self.tagOverlayManager.drawOverlawsOnCrop(self.cropInfo,self.examples)
+		# self.tagOverlayManager.drawOverlaws(self.examples)
 	def getPathAndName(self,filename):
 		path = filename.split("/")
 		name = path[len(path)-1]
@@ -548,7 +559,7 @@ class MarsUI:
 				self.cbxCropKey,self.crops = cropCtrl.retrieveCrops(self.project,image)
 			# self.overlayManager.setNumberOfOverlaws(len(self.crops))
 			self.overlayManager.drawOverlaws(self.crops)
-
+# sex
 				# print crop
 				# print crop.cropTopLeftX
 				# print crop.cropTopLeftY
@@ -597,7 +608,7 @@ class MarsUI:
 		print "Crop {0} {1} {2} {3} ".format(x,y,w,h)
 		# is the user cropping a crop
 		if(self.cropInfo):
-			# crop the crop by translating the points to the crop coordinate system
+			# crop the crop by translating the points from the crop coordinate system to image coordinate system
 			x = self.cropInfo.cropTopLeftX+x
 			y = self.cropInfo.cropTopLeftY+y
 			self.cropImg,self.cropInfo = cropCtrl.saveCrop(self.project,self.imageInfo,self.imageData,(x,y,w,h))

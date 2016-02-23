@@ -38,6 +38,7 @@ def retrieveCrops(project,image):
 	for crop in crops:
 		l.append(crop.src)
 		listCrops[crop.src] = crop
+		# print "crop in db x: {0} y: {1} ".format(crop.cropTopLeftX,crop.cropTopLeftY)
 		# listCrops.append(image)
 	return l,listCrops
 def getCrop(project,parentImage,cropInfo):

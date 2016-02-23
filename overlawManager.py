@@ -20,6 +20,7 @@ def collision(patch,x,y):
 	return (xcol and ycol)
 def insideRec(cropInfo,px,py,pw,ph):
 	x,y = cropInfo.cropTopLeftX,cropInfo.cropTopLeftY
+	print "x: {0},y: {1} ".format(x,y)
 	w = cropInfo.cropBottomRightX
 	h = cropInfo.cropBottomRightY
 	xcol = (px < x) and (w+x < pw+px)
@@ -48,8 +49,8 @@ class OverlayManager():
 		# move each patch to correct position
 		i = 0
 		for key in crops:
-			print "Crop "
 			crop = crops[key]
+			print "Crop: {0} {1}".format(crop.cropTopLeftX,crop.cropTopLeftY)
 			self.crops[i] = crop
 			# self.overlayManager.updateCrop(crop)
 			patch = self.patches[i]
@@ -71,6 +72,7 @@ class OverlayManager():
 		w = cropInfo.cropBottomRightX
 		h = cropInfo.cropBottomRightY
 		overlayCrops = {}
+		print "Crop location {0} {1} ".format(x,y)
 		# transform crops to cropInfo Space
 		for key in crops:
 			crop = crops[key]
@@ -115,6 +117,8 @@ class OverlayManager():
 					crop = self.crops[i]
 					print "collision with patch "+crop.src
 					self.marsUI.loadCrop(crop)
+					x,y = crop.cropTopLeftX,crop.cropTopLeftY
+					print "Crop location in DB {0} {1} ".format(x,y)
 					return 
 					# print "{0} {1} --> {2} {3} {4} {5} ".format(x,y,crop.cropTopLeftX,crop.cropTopLeftY,crop.cropBottomRightX,crop.cropBottomRightY)
 					# collision
