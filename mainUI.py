@@ -20,6 +20,8 @@ import matplotlib.patches as patches
 import math
 from overlawManager import OverlayManager
 from overlawManager import TagOverlayManager
+from overlawManager import SmallCrop
+
 
 def getLen(x):
 	return x[1]-x[0]
@@ -143,7 +145,7 @@ class TagSquare():
 			(0,0),   # (x,y)
 			1,          # width
 			1,          # height
-			hatch='x',
+			hatch='//',
 			fill=False
 			)
 		self.marsUI.add_patch(p)
@@ -162,17 +164,21 @@ class TagSquare():
 				taggedClass = self.marsUI.getSelectedClass()
 				print taggedClass.name
 				# save each size 
+				
+				'''
 				for size in self.sizesPatch:
 					self.scalePatch(size,size)
 					self.movePatch(x,y,True)
-					rec1 = self.getPatchRec(self.p1)
-					rec2 = self.getPatchRec(self.p2)
-					rec3 = self.getPatchRec(self.p3)
-					rec4 = self.getPatchRec(self.p4)
-					self.marsUI.saveExample(taggedClass,rec1)
-					self.marsUI.saveExample(taggedClass,rec2)
-					self.marsUI.saveExample(taggedClass,rec3)
-					self.marsUI.saveExample(taggedClass,rec4)
+				'''
+				# save selected size 
+				rec1 = self.getPatchRec(self.p1)
+				rec2 = self.getPatchRec(self.p2)
+				rec3 = self.getPatchRec(self.p3)
+				rec4 = self.getPatchRec(self.p4)
+				self.marsUI.saveExample(taggedClass,rec1)
+				self.marsUI.saveExample(taggedClass,rec2)
+				self.marsUI.saveExample(taggedClass,rec3)
+				self.marsUI.saveExample(taggedClass,rec4)
 				
 				# print " tagged "+self.marsUI.getSelectedClass().name
 		lock.release()
@@ -416,10 +422,19 @@ class MarsUI:
 		self.tagOverlayManager = TagOverlayManager(self)
 	def saveExample(self,taggedClass,rec):
 		# need to crop image
+		# but should extract the example from the original image instead of the cropped image
+		# but also restrict tag to be on crop images only
 		if(self.cropInfo!=None):
-			tagData = imageUtil.cropImage(self.cropData,rec[0],rec[1],rec[2],rec[3])
-			exampleCtrl.saveExample(taggedClass,self.project,self.cropInfo,rec,tagData)
-
+			# translating the points to the crop coordinate system
+			x = self.cropInfo.cropTopLeftX+rec[0]
+			y = self.cropInfo.cropTopLeftY+rec[1]
+			tagData = imageUtil.cropImage(self.imageData,x,y,rec[2],rec[3])
+			# tagData = imageUtil.cropImage(self.cropData,rec[0],rec[1],rec[2],rec[3])
+			example = exampleCtrl.saveExample(taggedClass,self.project,self.imageInfo,rec,tagData)
+			example = SmallCrop(example.topLeftX,example.topLeftY,example.bottomRightX,example.bottomRightY,example.src)
+			# display the newly crop on the front end
+			self.examples[example.src]=example
+			self.tagOverlayManager.drawOverlaws(self.examples)
 
 	def addCombobox(self,fn=None):
 		cbxClass = ttk.Combobox(self.master,width=10)

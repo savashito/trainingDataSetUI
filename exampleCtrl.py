@@ -16,6 +16,7 @@ def insertExample(_class,parentImageInfo,name,rec):
 def saveExample(_class,project,parentImageInfo,rec,imageData):
 	# find index of the next example from the current image being sampled
 	i = Example.select().where(Example._class == _class).count()
+	print "Rec is {0},{1} ,{2}, {3}".format(rec[0],rec[1],rec[2],rec[3])
 	print "the next index is " + str(i)
 	# create the name for the next sample
 	sampleName = _class.name+"_"+str(i)
@@ -23,8 +24,10 @@ def saveExample(_class,project,parentImageInfo,rec,imageData):
 	print sampleName
 	print sampleDir
 	imageUtil.saveImage(imageData,sampleName+".png",sampleDir)
+	print "parentCrop "+parentImageInfo.src
 	# Save to db
-	insertExample(_class,parentImageInfo,sampleName,rec)
+	return insertExample(_class,parentImageInfo,sampleName,rec)
+
 # returns the image and the example
 def getExample(project,exampleName):
 	example = Example.select().where(Example.src == exampleName).get()
