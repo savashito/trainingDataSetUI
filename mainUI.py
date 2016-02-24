@@ -391,11 +391,6 @@ class MarsUI:
 		self.canvas.mpl_connect('button_press_event',self.eventManager)
 		self.canvas.mpl_connect('motion_notify_event', self.eventManager)
 		self.canvas.mpl_connect('key_press_event', self.eventManager)
-		# remove horrible background
-		# self.canvas.get_tk_widget().configure(background='black',  highlightcolor='black', highlightbackground='black')
-
-		#ax.config(cursor='hand')
-		# cursor = Cursor(ax, useblit=True, color='red', linewidth=2)
 		self.canvas.show()
 		self.lblImageNameStatic.grid(row=1, column=0, sticky=W)
 		self.lblImageName.grid(row=1, column=1, sticky=W)
@@ -500,8 +495,6 @@ class MarsUI:
 		cropInfo = self.crops[cropName]
 		self.loadCrop(cropInfo)
 
-# cghf
-
 	def loadCrop(self,cropInfo):
 		print "\t--> SelectedCrop {0} {1} {2}".format(cropInfo.src,cropInfo.cropTopLeftX,cropInfo.cropTopLeftY)
 		self.cbxCrop.set(cropInfo.src)
@@ -513,20 +506,12 @@ class MarsUI:
 		# self.tagOverlayManager.setVisible(False)
 		# draw crops only visible on this crop
 		self.overlayManager.drawOverlawsOnCrop(self.cropInfo,self.crops)
-		# self.overlayManager.drawOverlawsOnCrop(self.cropInfo,self.crops)
-		# self.tagOverlayManager.drawOverlawsOnCrop(self.cropInfo,self.examples)
-		# load crop combobox
-		# self.updateCbxCrop(imageInfo)
-		# draw examples 
-		# self.examples = 
-		# cropsNames, self.crops = cropCtrl.retrieveCrops(self.project,self.imageInfo)
 		examplesNames, self.examples = exampleCtrl.retriveExamples(self.project,self.getSelectedClass(),self.imageInfo)
 		print 'examples names '+str(examplesNames)
 		# we are missing transformation
 		# examplesNames, self.examples = exampleCtrl.retriveExamples(self.project,self.getSelectedClass(),cropInfo)
 		# only draw the overlays the craters inside the overlay
 		self.tagOverlayManager.drawOverlawsOnCrop(self.cropInfo,self.examples)
-		# self.tagOverlayManager.drawOverlaws(self.examples)
 	def getPathAndName(self,filename):
 		path = filename.split("/")
 		name = path[len(path)-1]

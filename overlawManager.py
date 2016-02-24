@@ -39,6 +39,8 @@ class OverlayManager():
 		self.crops = []
 		self.marsUI = marsUI
 		self.active = False
+		self.cropsGlobalCordinateSystem = None
+
 	def drawOverlaws(self,crops):
 		# match patch leght
 		n = len(crops)
@@ -61,6 +63,9 @@ class OverlayManager():
 			i +=1 
 		self.active = True
 		self.marsUI.redraw()
+		# newly added crops, destroy the old coordinate system, 
+		# someone else should calculate this
+		self.cropsGlobalCordinateSystem = None
 		# self.setVisible(True)
 
 
@@ -74,12 +79,19 @@ class OverlayManager():
 		overlayCrops = {}
 		print "Crop location {0} {1} ".format(x,y)
 		# transform crops to cropInfo Space
+		cropsGlobalCordinateSystem = []
 		for key in crops:
 			crop = crops[key]
+
 			if(insideRec(crop,x,y,w,h)):
-				print 'InsideRec '+crop.src
+				print 'InsideRec '+crop.src				
+				cropsGlobalCordinateSystem.append( crop)
 				overlayCrops[crop.src] = transformToCropSpace(x,y,crop)
+
 		self.drawOverlaws(overlayCrops)
+		self.cropsGlobalCordinateSystem = cropsGlobalCordinateSystem
+		# restore original crops
+
 		# return overlayCrops
 		# draw crops that are smaller than crop
 	def setVisible(self,b):
@@ -114,11 +126,16 @@ class OverlayManager():
 			if(p.get_visible()):
 				print 'Patch {0} is selectable'.format(self.crops[i].src)
 				if(collision(p,x,y)):
-					crop = self.crops[i]
+					if(self.cropsGlobalCordinateSystem == None):
+						crop = self.crops[i]
+					else:	
+						crop = self.cropsGlobalCordinateSystem[i]
+						x,y = crop.cropTopLeftX,crop.cropTopLeftY
+						print "cropsGlobalCordinateSystem location in DB {0} {1} ".format(x,y)
 					print "collision with patch "+crop.src
 					self.marsUI.loadCrop(crop)
 					x,y = crop.cropTopLeftX,crop.cropTopLeftY
-					print "Crop location in DB {0} {1} ".format(x,y)
+					print "--> Crop location in DB {0} {1} ".format(x,y)
 					return 
 					# print "{0} {1} --> {2} {3} {4} {5} ".format(x,y,crop.cropTopLeftX,crop.cropTopLeftY,crop.cropBottomRightX,crop.cropBottomRightY)
 					# collision
