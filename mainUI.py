@@ -140,6 +140,9 @@ class TagSquare():
 		self.scaleIncrement = 0.01
 		self.x,self.y = 0,0
 		self.w,self.h = 0,0
+
+		self.single,self.quad = 0,1
+		self.maskSave = [self.singleMaskSave,self.quadMaskSave]
 	def addPatch(self):
 		p = patches.Rectangle(
 			(0,0),   # (x,y)
@@ -170,20 +173,28 @@ class TagSquare():
 					self.scalePatch(size,size)
 					self.movePatch(x,y,True)
 				'''
-				# save selected size 
-				rec1 = self.getPatchRec(self.p1)
-				rec2 = self.getPatchRec(self.p2)
-				rec3 = self.getPatchRec(self.p3)
-				rec4 = self.getPatchRec(self.p4)
-				self.marsUI.saveExample(taggedClass,rec1)
-				self.marsUI.saveExample(taggedClass,rec2)
-				self.marsUI.saveExample(taggedClass,rec3)
-				self.marsUI.saveExample(taggedClass,rec4)
+				self.maskSave[self.typeMask](taggedClass)
+
 				
 				# print " tagged "+self.marsUI.getSelectedClass().name
 		lock.release()
 				# 
 			# self.endTag()
+	def singleMaskSave(self,taggedClass):
+				# save selected size 
+		rec1 = self.getPatchRec(self.p1)		
+		self.marsUI.saveExample(taggedClass,rec1)
+
+	def quadMaskSave(self,taggedClass):
+				# save selected size 
+		rec1 = self.getPatchRec(self.p1)
+		rec2 = self.getPatchRec(self.p2)
+		rec3 = self.getPatchRec(self.p3)
+		rec4 = self.getPatchRec(self.p4)
+		self.marsUI.saveExample(taggedClass,rec1)
+		self.marsUI.saveExample(taggedClass,rec2)
+		self.marsUI.saveExample(taggedClass,rec3)
+		self.marsUI.saveExample(taggedClass,rec4)
 	def notTagging(self,x,y):
 		return
 	def taggingCursor(self,x,y):
@@ -225,6 +236,18 @@ class TagSquare():
 		self.p3.xy = x+rcos,y-self.h-rsin
 		self.p4.xy = x-self.w-rcos,y+rsin
 		self.x,self.y = x,y
+	def singleMask(self):
+		self.p1.set_visible(True)
+		self.p2.set_visible(False)
+		self.p3.set_visible(False)
+		self.p4.set_visible(False)	
+		self.typeMask = self.single
+	def quadMask(self):
+		self.p1.set_visible(True)
+		self.p2.set_visible(True)
+		self.p3.set_visible(True)
+		self.p4.set_visible(True)
+		self.typeMask = self.quad
 	def keyEvent(self,key):
 		print key
 		if(isInt(key)):
@@ -241,6 +264,10 @@ class TagSquare():
 			self.ang -= (math.pi/32.0)
 			x,y = self.x ,self.y 
 			self.movePatch(x,y)
+		elif(key == 'a'):
+			self.quadMask()
+		elif(key == 's'):
+			self.singleMask()
 		elif(key == '+'):
 
 			self.scaleX += self.scaleIncrement
@@ -536,12 +563,15 @@ class MarsUI:
 		# print self.imageData
 		# self.img = imageUtil.loadImage('testImages/stinkbug.png')
 		self.updateImageDisplay()
-		# contact db
+		# Add image to combobox
+		self.cbxImagesKey.append(self.imageInfo.src)
+		self.images[self.imageInfo.src] = self.imageInfo
+		self.cbxImage['values'] = self.cbxImagesKey
 	def OverlawCrops(self):
 		if(self.imageInfo!=None):
 			# Extract crops
 			if(self.crops == {}):
-				self.cbxCropKey,self.crops = cropCtrl.retrieveCrops(self.project,image)
+				self.cbxCropKey,self.crops = cropCtrl.retrieveCrops(self.project,self.imageInfo)
 			# self.overlayManager.setNumberOfOverlaws(len(self.crops))
 			self.overlayManager.drawOverlaws(self.crops)
 # sex
