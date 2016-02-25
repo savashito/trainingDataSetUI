@@ -49,8 +49,8 @@ def listExamples(_class):
 		listExamples[name] = example
 	return l,listExamples
 
-def retriveExamples(project,_class,cropInfo):
-	examples = Example.select().where(Example._class == _class and Example.parentCrop == cropInfo)
+def retriveExamples(project,_class,cropInfo,size):
+	examples = Example.select().where(Example._class == _class, Example.parentCrop == cropInfo,Example.bottomRightX == size)
 	l = []
 	listCrops = {}
 	try :

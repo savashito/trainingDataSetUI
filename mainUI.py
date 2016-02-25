@@ -133,7 +133,6 @@ class TagSquare():
 		self.p4 = self.addPatch()
 		self.r = 0
 		self.scaleX,self.scaleY = 0.1,0.1
-		self.setVisibilityPatch(False)
 		self.ang = math.pi/4
 		self.sizesPatch = [16,32,64,128]
 		self.displaySize = 0
@@ -143,6 +142,10 @@ class TagSquare():
 
 		self.single,self.quad = 0,1
 		self.maskSave = [self.singleMaskSave,self.quadMaskSave]
+		self.setVisibleMask = [self.setVisibilitySingle,self.setVisibilityQuad]
+
+		self.quadMask()
+		self.setVisibilityPatch(False)
 	def addPatch(self):
 		p = patches.Rectangle(
 			(0,0),   # (x,y)
@@ -153,6 +156,8 @@ class TagSquare():
 			)
 		self.marsUI.add_patch(p)
 		return p
+	def getDisplaySize(self):
+		return self.sizesPatch[self.displaySize]
 	def getPatchRec(self,p):
 		w = p.get_width()
 		h = p.get_height()
@@ -209,6 +214,11 @@ class TagSquare():
 	def move(self,x,y):
 		self.tag[self.tagIndex](x,y)
 	def setVisibilityPatch(self,visible):
+		self.setVisibleMask[self.typeMask](visible)
+	def setVisibilitySingle(self,visible):
+		self.p1.set_visible(visible)
+
+	def setVisibilityQuad(self,visible):
 		self.p1.set_visible(visible)
 		self.p2.set_visible(visible)
 		self.p3.set_visible(visible)
@@ -256,6 +266,7 @@ class TagSquare():
 			self.displaySize = n
 			x,y = self.x ,self.y 
 			self.move(x,y)
+			self.marsUI.displayExamplesOverlay()
 		elif(key == 'q'):
 			self.ang += (math.pi/32.0)
 			x,y = self.x ,self.y 
@@ -339,6 +350,9 @@ class OnHover(object):
 	def tag(self):
 		# print "taggg"
 		self.tagSqr.startTag()
+	def getMaskSize(self):
+		return self.tagSqr.getDisplaySize()
+
 		'''
 		if(event.button==1):
 			canvas.draw()
@@ -377,7 +391,7 @@ class MarsUI:
 		self.btnCropImage = Button(master, text="Crop image", command=self.cropImage)
 		
 		# class dropdowns
-		self.cbxClass = self.addCombobox()
+		self.cbxClass = self.addCombobox(self.classSelected)
 		self.cbxImage = self.addCombobox(self.imageSelected)
 		self.cbxCrop = self.addCombobox(self.cropSelected)
 
@@ -500,6 +514,12 @@ class MarsUI:
 		classCtrl.insertClass(self.classText,self.project)
 		print "addClass "+str(self.classText)
 		self.updateFields()
+	def classSelected(self,event):
+		_class = self.getSelectedClass()
+		print "selectec cls "+_class.name
+		# self.overlayManager.drawOverlawsOnCrop(self.cropInfo,self.crops)
+		if(self.cropInfo!=None):
+			self.displayExamplesOverlay()
 	def imageSelected(self,event):
 		imageName = self.cbxImage.get()
 		imageInfo = self.images[imageName]
@@ -521,7 +541,11 @@ class MarsUI:
 		cropName = self.cbxCrop.get()
 		cropInfo = self.crops[cropName]
 		self.loadCrop(cropInfo)
-
+	def displayExamplesOverlay(self):
+		size = self.eventManager.getMaskSize() #  // self.tagSqr.getDisplaySize()
+		examplesNames, self.examples = exampleCtrl.retriveExamples(self.project,self.getSelectedClass(),self.imageInfo,size)
+		print 'examples names '+str(examplesNames)
+		self.tagOverlayManager.drawOverlawsOnCrop(self.cropInfo,self.examples)
 	def loadCrop(self,cropInfo):
 		print "\t--> SelectedCrop {0} {1} {2}".format(cropInfo.src,cropInfo.cropTopLeftX,cropInfo.cropTopLeftY)
 		self.cbxCrop.set(cropInfo.src)
@@ -533,12 +557,8 @@ class MarsUI:
 		# self.tagOverlayManager.setVisible(False)
 		# draw crops only visible on this crop
 		self.overlayManager.drawOverlawsOnCrop(self.cropInfo,self.crops)
-		examplesNames, self.examples = exampleCtrl.retriveExamples(self.project,self.getSelectedClass(),self.imageInfo)
-		print 'examples names '+str(examplesNames)
-		# we are missing transformation
-		# examplesNames, self.examples = exampleCtrl.retriveExamples(self.project,self.getSelectedClass(),cropInfo)
-		# only draw the overlays the craters inside the overlay
-		self.tagOverlayManager.drawOverlawsOnCrop(self.cropInfo,self.examples)
+		self.displayExamplesOverlay()
+		
 	def getPathAndName(self,filename):
 		path = filename.split("/")
 		name = path[len(path)-1]
