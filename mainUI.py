@@ -146,6 +146,9 @@ class TagSquare():
 
 		self.quadMask()
 		self.setVisibilityPatch(False)
+	def getPatchSizes(self):
+		return self.sizesPatch
+
 	def addPatch(self):
 		p = patches.Rectangle(
 			(0,0),   # (x,y)
@@ -350,6 +353,8 @@ class OnHover(object):
 	def tag(self):
 		# print "taggg"
 		self.tagSqr.startTag()
+	def getPatchSizes(self):
+		return self.tagSqr.getPatchSizes()
 	def getMaskSize(self):
 		return self.tagSqr.getDisplaySize()
 
@@ -447,8 +452,8 @@ class MarsUI:
 		self.btnAddClass.grid(row=9, column=1,sticky=W,pady=10)
 		self.entClass.grid(row=9, column=0,sticky=W)
 
-		self.lblClassBackground.grid(row=10, column=0,sticky=W,pady=10)
-		self.lblClass.grid(row=11, column=0,sticky=W)
+		self.lblClassBackground.grid(row=10, column=0,sticky=W,pady=10,columnspan=12)
+		self.lblClass.grid(row=11, column=0,sticky=W,columnspan=12)
 		# clean variables
 		self.cropInfo,self.cropData,self.imageInfo,self.imageData = None,None,None,None
 		self.cbxCropKey = []
@@ -456,6 +461,7 @@ class MarsUI:
 		self.examples = {}
 		self.overlayManager = OverlayManager(self)
 		self.tagOverlayManager = TagOverlayManager(self)
+		self.setClassNumber("craters",[16,32,64],[50,4,35])
 	def saveExample(self,taggedClass,rec):
 		# need to crop image
 		# but should extract the example from the original image instead of the cropped image
@@ -496,7 +502,7 @@ class MarsUI:
 		self.cbxClassValues,self.classes = classCtrl.listClassesName(self.project)# ['crater', 'cone', 'background']
 		self.cbxClass['values'] = self.cbxClassValues
 
-		self.setClassNumber(3)
+		# self.setClassNumber(3)
 
 	def tagImage(self):
 		print "Tag"
@@ -520,6 +526,11 @@ class MarsUI:
 		# self.overlayManager.drawOverlawsOnCrop(self.cropInfo,self.crops)
 		if(self.cropInfo!=None):
 			self.displayExamplesOverlay()
+		# update name 
+		sizes = self.eventManager.getPatchSizes()
+		l=exampleCtrl.getExampleSizeCount(self.project,_class,sizes)
+		self.setClassNumber(_class.name,sizes,l )
+
 	def imageSelected(self,event):
 		imageName = self.cbxImage.get()
 		imageInfo = self.images[imageName]
@@ -533,7 +544,8 @@ class MarsUI:
 		# self.cbxImage 
 		print "selected "
 		# unload crop
-		cropName,cropInfo,cropData = None,None,None
+		self.cropInfo,self.cropData = None,None
+
 		self.tagOverlayManager.setVisible(False)
 		# show overlaw
 		self.OverlawCrops()
@@ -587,6 +599,8 @@ class MarsUI:
 		self.cbxImagesKey.append(self.imageInfo.src)
 		self.images[self.imageInfo.src] = self.imageInfo
 		self.cbxImage['values'] = self.cbxImagesKey
+		# unload crop
+		self.cropInfo,self.cropData = None,None
 	def OverlawCrops(self):
 		if(self.imageInfo!=None):
 			# Extract crops
@@ -640,7 +654,7 @@ class MarsUI:
 		if(h<0):
 			y = y +h
 			h=-h
-		print "Crop {0} {1} {2} {3} ".format(x,y,w,h)
+		print "mainUI.crop() Crop {0} {1} {2} {3} ".format(x,y,w,h)
 		# is the user cropping a crop
 		if(self.cropInfo):
 			# crop the crop by translating the points from the crop coordinate system to image coordinate system
@@ -664,9 +678,18 @@ class MarsUI:
 		self.cbxCropKey.append(self.cropInfo.src)
 		self.cbxCrop['values'] = self.cbxCropKey
 		print "Crop image"
-	def setClassNumber(self,number):
-		self.lblClassText.set("{0}: {1}".format("Crater",str(number)))
-		self.lblClassNegativeText.set("Background: {0}".format(5))
+	def setClassNumber(self,name,sizes,l ):
+		strClassNumbers = name +": "
+		i=0
+		for size in sizes:
+			strClassNumbers+= '['+str(size)+'] = '+str(l[i]) +',\t'
+			i+=1
+		print strClassNumbers
+		self.lblClassText.set(strClassNumbers)
+	# def setClassNumber(self,name, number):
+
+	# 	self.lblClassText.set("{0}: {1}".format(name,str(number)))
+		# self.lblClassNegativeText.set("Background: {0}".format(5))
 	def setImageName(self,name):
 		self.lblImageNameText.set("{0}".format(name))
 root = Tk()

@@ -48,7 +48,13 @@ def listExamples(_class):
 		l.append(name)
 		listExamples[name] = example
 	return l,listExamples
-
+def getExampleSizeCount(project,_class,sizes):
+	l = []
+	for size in sizes:
+		examples = Example.select().where(Example._class == _class,Example.bottomRightX == size)
+		l.append(examples.count())
+	print l
+	return l
 def retriveExamples(project,_class,cropInfo,size):
 	examples = Example.select().where(Example._class == _class, Example.parentCrop == cropInfo,Example.bottomRightX == size)
 	l = []

@@ -9,7 +9,7 @@ import imageCtrl
 def saveCrop(project,imageInfo,imageData,rec):
 	# find index of the next crop from the current image being cropped
 	i = Crop.select().where(Crop.originalImage == imageInfo.id).count()
-	print "The next crop index is: "+str(i)
+	print "cropCtrl.saveCrop The next crop index is: "+str(i)
 	name = imageInfo.src.split('.')[0]
 	cropName = name+"_crop_"+str(i)+".png"
 	cropDir = imageCtrl.getImageDir(imageInfo.src,project)
