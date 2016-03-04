@@ -557,7 +557,8 @@ class MarsUI:
 		size = self.eventManager.getMaskSize() #  // self.tagSqr.getDisplaySize()
 		examplesNames, self.examples = exampleCtrl.retriveExamples(self.project,self.getSelectedClass(),self.imageInfo,size)
 		print 'examples names '+str(examplesNames)
-		self.tagOverlayManager.drawOverlawsOnCrop(self.cropInfo,self.examples)
+		if(self.cropInfo!=None):
+			self.tagOverlayManager.drawOverlawsOnCrop(self.cropInfo,self.examples)
 	def loadCrop(self,cropInfo):
 		print "\t--> SelectedCrop {0} {1} {2}".format(cropInfo.src,cropInfo.cropTopLeftX,cropInfo.cropTopLeftY)
 		self.cbxCrop.set(cropInfo.src)
