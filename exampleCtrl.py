@@ -28,6 +28,14 @@ def saveExample(_class,project,parentImageInfo,rec,imageData):
 	# Save to db
 	return insertExample(_class,parentImageInfo,sampleName,rec)
 
+def loadExample(project,_class,example):
+	sampleName = example.src
+	sampleDir = getExamplesDir(project,_class)
+	sampleFullName = "{0}/{1}.png".format(sampleDir,sampleName)
+	# print sampleFullName
+	image,name = imageUtil.loadImage(sampleFullName)
+	return image
+
 # returns the image and the example
 def getExample(project,exampleName):
 	example = Example.select().where(Example.src == exampleName).get()
@@ -39,8 +47,7 @@ def getExamplesDir(project,_class):
 	directory = project.outputImageFolder
 	imageDir = "{0}/examples/{1}".format(directory,name)
 	return imageDir
-def listExamples(_class):
-	examples = Example.select().where(Example._class == _class)
+def listify(examples):
 	l = []
 	listExamples = {}
 	for example in examples:
@@ -48,6 +55,23 @@ def listExamples(_class):
 		l.append(name)
 		listExamples[name] = example
 	return l,listExamples
+
+def listExamples(_class):
+	examples = Example.select().where(Example._class == _class)
+	return listify(examples)
+def getExampleSize(project,_class,size):
+	examples = Example.select().where(Example._class == _class,Example.bottomRightX == size)
+	l = []
+	listExamples = []
+	listClassIdentifier = []
+	for example in examples:
+		l.append(example)
+		image = loadExample(project,_class,example)
+		listExamples.append(image)
+		listClassIdentifier.append(_class.id)
+	print "loaded %d samples of %s, size: %dx%d"%(len(listExamples),_class.name,size,size)
+	return l,listExamples,listClassIdentifier
+
 def getExampleSizeCount(project,_class,sizes):
 	l = []
 	for size in sizes:

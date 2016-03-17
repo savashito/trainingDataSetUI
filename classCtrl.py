@@ -19,6 +19,9 @@ def listClassesName(project):
 def getClass(name):
 	return Class.select().where(Class.name == name).get()
 
+def getExampleSizes(_class):
+	return [16,32,64,128]
+
 # initDB()
 # cratersProject = getProject("Craters")
 # insertClass("craters",cratersProject)

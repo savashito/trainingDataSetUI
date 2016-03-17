@@ -1,17 +1,20 @@
 import peewee
 from marsSchema import Image
 import imageUtil # import saveImage3,loadImage
-def insertImages(listImages):
+
+def insertImages(project,listImages):
+	images = []
 	for image in listImages:
 		try:
-			Image.create(
+			images.append(Image.create(
 				src=image['src'],
 				longitud=image['longitud'],
 				latitide=image['latitide'],
-				resolution=image['resolution'])
+				resolution=image['resolution'],
+				project = project))
 			print "Image inserted "
 		except peewee.IntegrityError as e:
-			print "image updated {0}  ".format(e)
+			print "image already exists {0}  ".format(e)
 			# imageRecord = Image.get(src=image['src'])
 			'''
 			imageRecord.longitud = image['longitud']
@@ -19,6 +22,7 @@ def insertImages(listImages):
 			imageRecord.resolution = image['resolution']
 			imageRecord.save()
 			'''
+	return images
 	
 def saveImage(project,img,name,metadata):
 	meta = readMetadata(metadata)
