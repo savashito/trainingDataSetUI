@@ -8,18 +8,47 @@ from sklearn import svm
 from sklearn.cross_validation import train_test_split
 import numpy as np
 import fitParameters
+from heatmap import Heatmap
 
 
 mlProject = MLProject("Craters")
 
 nameImages = mlProject.listImages()
-mlProject.setImage(nameImages[0])
+mlProject.setImage(nameImages[0])  # 1
 nameCrops = mlProject.listCrops()
-mlProject.setCrop(nameCrops[0])
+mlProject.setCrop(nameCrops[0]) # 3
 
+# print nameCrops[3]
+# exit()
+
+###########
+'''
+def findBestFit(mlProject):
+	sizes = mlProject.getWindowSizes()
+	bestFit = []
+	print sizes
+	for size in range(len(sizes)):
+		images,target = mlProject.getExamples(size)
+		X_train, X_validation, y_train, y_validation = train_test_split(images,target,test_size=0.20, random_state=42)
+		gamma,c = fitParameters.findBestParametersSV(X_train,y_train)
+		fit = {'gamma':gamma,'C':c}
+		bestFit.append(fit)
+		print bestFit
+	return bestFit
+		
+bestFit = findBestFit(mlProject)
+print bestFit
+exit()
+'''
+# gamma,c,clf = fitParameters.findBestParametersSV(X_train,y_train)
+
+###########
 # size = 2
 
-bestFit = [{},{},{'C': 10.0, 'gamma': 0.001},{'C': 10.0, 'gamma': 0.0001}]
+# bestFit = [{'C': 0.01, 'gamma': 1.0000000000000001e-09}, {'C': 1.0, 'gamma': 0.001}, {'C': 1.0, 'gamma': 0.0001}, {'C': 10.0, 'gamma': 1.0000000000000001e-05}]
+bestFit = [{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 1.0, 'gamma': 0.001},{'C': 10.0, 'gamma': 0.0001}]
+# bestFit = [{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 10.0, 'gamma': 0.001},{'C': 10.0, 'gamma': 0.0001}]
+
 validationSetX =[]
 validationSetY =[]
 clfs = []
@@ -38,7 +67,30 @@ for size in range(len(bestFit)):
 		validationSetX.append(None)
 		validationSetY.append(None)
 		clfs.append(None)
-# gamma,c,clf = fitParameters.findBestParametersSV(X_train,y_train)
+
+
+
+
+heatmap = Heatmap (clfs,mlProject)
+
+# heatmap.generate(0)
+# heatmap.plot()
+# heatmap.generate(1)
+# heatmap.plot()
+
+
+
+heatmap.generate(2)
+centroids = heatmap.getCentroids()
+heatmap.plot()
+# heatmap.generate(3)
+# heatmap.plot()
+heatmap.show()
+
+
+
+
+
 '''
 size = 3
 testSet = validationSetX[size]
@@ -59,73 +111,7 @@ exit()
 # print clfs[size].predict_proba(win)[0,0]
 # exit()
 
-import matplotlib.pyplot as plt
 
-class Heatmap:
-	def __init__(self,clfs,mlProject):
-		self.clfs = clfs
-		self.mlProject = mlProject
-		print size
-		window = mlProject.getCropWindow(size,1116.0,6.0)
-		print clfs[size].predict_proba(window)[0,0]
-	def generate(self):
-		size = 2
-		# overlapPercent = 0.90
-		overlapPercent = 0.10
-		clf = self.clfs[size]
-
-		cropW,cropH =  mlProject.getCropShape()[0],mlProject.getCropShape()[1]
-
-		windowW,windowH = mlProject.getWindowSize(size)
-		print windowW
-		dx = np.around(windowW*(1-overlapPercent))
-		heatmapW = int(np.floor((cropW-windowW)/dx))
-		heatmapH = int(np.floor((cropH-windowH)/dx))
-		heatmapArray = np.zeros((heatmapW,heatmapH))
-		# crop = mlProject.getCrop()
-		for y in range(heatmapH):
-			for x in range(heatmapW):
-				xCrop,yCrop = x*dx,y*dx
-				# get window
-				# print x,y,heatmapW
-				# print 
-				window = mlProject.getCropWindow(size,xCrop,yCrop)
-				#window = mlProject.getCropWindow(size,1116.0,6.0)
-				#print window.shape
-				# print window.shape
-				# window = window.reshape(1, -1)
-				# print window.shape
-				# print clf.predict_proba(window)
-				# return 
-				#print clf.predict_proba(window)[0,0]
-				# return
-				# return
-				
-				if(clf.predict_proba(window)[0,0] < 0.5):
-					heatmapArray[x][y] = 0 
-				else :
-					heatmapArray[x][y] = 1 
-				
-				# np.max( (0.5,clf.predict_proba(window)[0,0]) )
-			# print xCrop,yCrop,heatmapArray[x][y]
-		print heatmapArray.shape
-		# print np.max(heatmapArray)
-		# plt.imshow(heatmapArray)
-
-		# plt.title(self.cropInfo.src)
-		# plt.show()
-		self.heatmapArray = heatmapArray
-		# print heatmapArray.shape
-		# print cropW,cropH
-		# print dx
-	def plot(self):
-		self.mlProject.displayCrop(self.heatmapArray)
-
-
-heatmap = Heatmap (clfs,mlProject)
-
-heatmap.generate()
-heatmap.plot()
 
 
 

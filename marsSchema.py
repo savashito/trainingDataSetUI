@@ -18,7 +18,7 @@ class Image(BaseModel):
 	longitud = FloatField()
 	latitide = FloatField()
 	resolution = FloatField() # meters per pixel
-	metadata = CharField(null =True)
+	metadata = CharField(null=True)
 	project = ForeignKeyField(Project)
 	class Meta:
 	 	order_by = ('src',)
@@ -46,7 +46,12 @@ class Example(BaseModel):
 	bottomRightX = IntegerField()
 	bottomRightY = IntegerField()
 
-def initDB():
+def initDB(dbIn = None):
+	# if(dbIn!=None):
+	# 	print "using dbin"
+	# 	dbIn.connect()
+	# 	dbIn.create_tables([Image,Project,Crop,Class,Example],safe=True)
+	# else:
 	db.connect()
 	db.create_tables([Image,Project,Crop,Class,Example],safe=True)
 	print "Database Initialized"

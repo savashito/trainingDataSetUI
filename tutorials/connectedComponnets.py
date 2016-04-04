@@ -43,9 +43,14 @@ def initCentroids():
 	              [2,0,4,4],
 	              [2,0,4,4]))
 	return b
+def getBlobs(arr):
+	return measure.label(arr, background=0)
 def getCentroids(blobs):
+	print blobs
 	max = np.max(blobs)
-	# print max
+
+	print max
+	max = int(max)
 	arr = range(1,max+1)
 	lbl = ndimage.label(blobs)[0]
 	return ndimage.measurements.center_of_mass(blobs, lbl, arr)
@@ -60,8 +65,8 @@ def plotCircles(img,circles):
 	
 	plt.show()
 
-blobs = measure.label(initConnectedComponentsData(), background=0)
+# blobs = measure.label(initConnectedComponentsData(), background=0)
 # blobs = initCentroids()
-circles = getCentroids(blobs)
+# circles = getCentroids(blobs)
 # print circles
-plotCircles(blobs,circles)
+# plotCircles(blobs,circles)

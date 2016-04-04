@@ -78,6 +78,8 @@ class MLProject:
 		flatWindow = np.float64(toGrayScale( np.array(outWindow)).reshape(1, -1))
 		X = self.scaler[sizeIndex].transform(flatWindow)
 		return X
+	def getWindowSizes(self):
+		return self.sizes
 	def getWindowSize(self,size):
 		return self.sizes[size],self.sizes[size]
 	def getCrop(self):
@@ -95,7 +97,6 @@ class MLProject:
 		ax.imshow(self.cropData)
 		ax.imshow(heatmapAlpha)
 		plt.title(self.cropInfo.src)
-		plt.show()
 
 	# def selectImage(self,image):
 

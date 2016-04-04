@@ -86,6 +86,7 @@ def retrieveImages(project):
 	images = Image.select()
 	l = []
 	listImages = {}
+	print images
 	for image in images:
 		l.append(image.src)
 		listImages[image.src] = image

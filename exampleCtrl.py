@@ -42,11 +42,24 @@ def getExample(project,exampleName):
 	sampleDir = getExamplesDir(project,example._class)
 	imageData,name = imageUtil.loadImage(sampleDir+"/"+example.src+".png")
 	return imageData,example
+def deleteExmplesBySrc(name):
+	q = Example.delete().where(Example.src == name) # .where(Example._class == _class.id)
+	q.execute()
+def deleteExmplesBySrcRange(name,start,end):
+	for i in range(start,end):
+		exName = name+'_'+str(i)
+		# print exName
+		deleteExmplesBySrc(exName)
+
+def deleteExmples(_class):
+	q = Example.delete().where(Example._class == _class) # .where(Example._class == _class.id)
+	q.execute()
 def getExamplesDir(project,_class):
 	name = _class.name
 	directory = project.outputImageFolder
 	imageDir = "{0}/examples/{1}".format(directory,name)
 	return imageDir
+
 def listify(examples):
 	l = []
 	listExamples = {}
