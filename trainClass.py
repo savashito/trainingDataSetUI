@@ -14,12 +14,14 @@ import sys
 mlProject = MLProject("Craters")
 nameImages = mlProject.listImages()
 mlProject.setImage(nameImages[0])  # 1
-nameCrops = mlProject.listCrops()
-mlProject.setCrop(nameCrops[0]) # 3
+# print nameImages[0]
+# nameCrops = mlProject.listCrops()
+# mlProject.setCrop(nameCrops[0]) # 3
 
+mlProject.rotateExamplesCrater()
 
 # print nameCrops[3]
-# exit()
+exit()
 
 ###########
 '''

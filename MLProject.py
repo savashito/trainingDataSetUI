@@ -49,10 +49,27 @@ class MLProject:
 		size = self.sizes[sizeIndex]
 		lCraterInfo,listCratersImg,listCraterIdentifier  =  exampleCtrl.getExampleSize(project,_class,size)
 		listBackgroundInfo,listBackgroundImg,listBackIdentifier  =  exampleCtrl.getExampleSize(project,classBackground,size)
-		return listCraterIdentifier + listBackIdentifier,listCratersImg + listBackgroundImg
+
+		return listCraterIdentifier + listBackIdentifier,listCratersImg + listBackgroundImg,lCraterInfo+listBackgroundInfo
+
+	def rotateExamplesCrater(self):
+		sizes = classCtrl.getExampleSizes(None)
+		for sizeIndex in range(len(sizes)):
+			examplesClass,examplesData,examplesInfo = self.getExamples_raw(sizeIndex)
+			for i in range(len(examplesInfo)):
+				exampleData = examplesData[i]
+				exampleInfo = examplesInfo[i]
+				exampleClass = examplesClass[i]
+				img90 = imageUtil.rotateImage(np.array(exampleData),90.0)
+				img180 = imageUtil.rotateImage(np.array(exampleData),180.0)
+				img270 = imageUtil.rotateImage(np.array(exampleData),270.0)
+				exampleCtrl.saveExampleTransformed(exampleInfo,img90,self.project)
+				exampleCtrl.saveExampleTransformed(exampleInfo,img180,self.project)
+				exampleCtrl.saveExampleTransformed(exampleInfo,img270,self.project)
+			# print examplesInfo
 
 	def getExamples(self,sizeIndex):
-		listExamples,examplesImg = self.getExamples_raw(sizeIndex)
+		listExamples,examplesImg,examplesInfo = self.getExamples_raw(sizeIndex)
 		
 		listExamplesImages = flatenImagesList(examplesImg)
 		
@@ -63,7 +80,7 @@ class MLProject:
 		return X,listExamples
 	# adds 3 rotated examples per sample (0,90,180,270)
 	def getRotatedExamples(self,sizeIndex):
-		listExamples,examplesImg = self.getExamples_raw(sizeIndex)
+		listExamples,examplesImg,examplesInfo = self.getExamples_raw(sizeIndex)
 
 		# print examplesImg[0].shape
 		rotatedListExamples, rotatedImg = [],[]
