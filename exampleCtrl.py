@@ -28,6 +28,9 @@ def saveExample(_class,project,parentImageInfo,rec,imageData):
 	# Save to db
 	return insertExample(_class,parentImageInfo,sampleName,rec)
 
+# def rotateExample(imageData):
+	
+
 def loadExample(project,_class,example):
 	sampleName = example.src
 	sampleDir = getExamplesDir(project,_class)

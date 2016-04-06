@@ -1,5 +1,7 @@
 from marsSchema import Project,initDB
 import peewee
+import os
+
 
 def insertProject(name):
 	return Project.create(name = name,
@@ -11,6 +13,11 @@ def listProjects():
 	for p in projects:
 		print "Project: {0}".format(p.name)
 
+def updateOutputImageFolder(project):
+	# print(os.path.dirname(__file__))
+	project.outputImageFolder = os.path.dirname(__file__)+os.sep+"images"
+	print project.outputImageFolder
+	project.save()
 def getProject(name):
 	project = None
 	try:

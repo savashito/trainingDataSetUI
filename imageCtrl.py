@@ -1,4 +1,5 @@
 import peewee
+import os
 from marsSchema import Image
 import imageUtil # import saveImage3,loadImage
 
@@ -38,6 +39,7 @@ def saveImage(project,img,name,metadata):
 				)
 	except peewee.IntegrityError:
 		print "Key exists: "+name
+		imageInfo = Image.select().where(Image.src==name).get()
 	directory = getImageDir(name,project)
 	print 'Dir: '+directory
 	# save image to HD
@@ -53,7 +55,7 @@ def getImage(name,project,path=None,imageInfo=None):
 		except Image.DoesNotExist:
 			print "bark bark"
 			# no metadata
-			filename = "{0}/{1}".format(path,name)
+			filename = "{0}{2}{1}".format(path,name,os.sep)
 			print filename
 			imageData,name = imageUtil.loadImage(filename)
 			# print imageData
@@ -63,7 +65,7 @@ def getImage(name,project,path=None,imageInfo=None):
 	# print "imageData "+str(imageData)
 	if(imageData==None):
 		directory = getImageDir(name,project)
-		filename = "{0}/{1}".format(directory,name)
+		filename = "{0}{2}{1}".format(directory,name,os.sep)
 		imageData,name = imageUtil.loadImage(filename)
 		# imageData,name = imageUtil.loadImageForDisplay(filename)
 		
@@ -74,7 +76,8 @@ def getImageDir(name,project):
 	directory = project.outputImageFolder
 	l = name.split('.')
 	name = l[0]
-	imageDir = "{0}/{1}".format(directory,name)
+	imageDir = "{0}{2}{1}".format(directory,name,os.sep)
+	print imageDir
 	return imageDir
 def readMetadata(m):
 	return {

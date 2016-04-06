@@ -3,6 +3,7 @@ import projectCtrl
 import classCtrl
 import imageCtrl
 import cropCtrl
+import imageUtil
 import numpy as np
 
 def toGrayScale(image):
@@ -31,7 +32,10 @@ class MLProject:
 		self.currentImage = None
 		self.sizes = classCtrl.getExampleSizes(None)
 		self.scaler = [None,None,None,None]
-	def getExamples(self,sizeIndex):
+		projectCtrl.updateOutputImageFolder(self.project)
+
+
+	def getExamples_raw(self,sizeIndex):
 		# retrieve class from the project
 		project = self.project
 		l,classes = classCtrl.listClassesName(project)
@@ -45,15 +49,66 @@ class MLProject:
 		size = self.sizes[sizeIndex]
 		lCraterInfo,listCratersImg,listCraterIdentifier  =  exampleCtrl.getExampleSize(project,_class,size)
 		listBackgroundInfo,listBackgroundImg,listBackIdentifier  =  exampleCtrl.getExampleSize(project,classBackground,size)
+		return listCraterIdentifier + listBackIdentifier,listCratersImg + listBackgroundImg
 
-		listExamples = listCraterIdentifier + listBackIdentifier
-		listExamplesImages = flatenImagesList(listCratersImg + listBackgroundImg)
+	def getExamples(self,sizeIndex):
+		listExamples,examplesImg = self.getExamples_raw(sizeIndex)
 		
+		listExamplesImages = flatenImagesList(examplesImg)
+		
+		# Normalize example!
 		scaler = StandardScaler()
 		X = scaler.fit_transform(listExamplesImages)
 		self.scaler[sizeIndex] = scaler
 		return X,listExamples
-		
+	# adds 3 rotated examples per sample (0,90,180,270)
+	def getRotatedExamples(self,sizeIndex):
+		listExamples,examplesImg = self.getExamples_raw(sizeIndex)
+
+		# print examplesImg[0].shape
+		rotatedListExamples, rotatedImg = [],[]
+		# plt.show()
+		for i in range(len(examplesImg)):
+			img = examplesImg[i]
+			img90 = imageUtil.rotateImage(np.array(examplesImg[i]),90.0)
+			img180 = imageUtil.rotateImage(np.array(examplesImg[i]),180.0)
+			img270 = imageUtil.rotateImage(np.array(examplesImg[i]),270.0)
+			rotatedImg.append(img)
+			rotatedImg.append(img90)
+			rotatedImg.append(img180)
+			rotatedImg.append(img270)
+			rotatedListExamples.append(listExamples[i])
+			rotatedListExamples.append(listExamples[i])
+			rotatedListExamples.append(listExamples[i])
+			rotatedListExamples.append(listExamples[i])
+		# rotatedImg = np.array(rotatedImg)
+		# print "wof "+str(rotatedImg.shape)
+		print rotatedImg[0].shape
+		listExamplesImages = flatenImagesList(rotatedImg)
+		# normalize the images
+		# print "wof "+str(listExamplesImages.shape)
+		scaler = StandardScaler()
+		# print "wofs"
+		X = scaler.fit_transform(listExamplesImages)
+		# print "wof"
+		self.scaler[sizeIndex] = scaler
+		# print "wof"
+
+		return X,rotatedListExamples
+
+		# imgRot = examplesImg[0] # imageUtilfg.rotateImageg(examplesImg[0],45)
+
+		# fig, ax = plt.subplots()
+		# ax.imshow( examplesImg[0])
+		# fig, ax = plt.subplots()
+		# ax.imshow( img90)
+		# fig, ax = plt.subplots()
+		# ax.imshow( img180)
+		# fig, ax = plt.subplots()
+		# ax.imshow( img270)
+		# plt.show()
+
+		# exit()
 	def listImages(self):
 		imagesName, self.images = imageCtrl.retrieveImages(self.project)
 		return imagesName

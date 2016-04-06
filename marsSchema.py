@@ -1,6 +1,6 @@
 from peewee import *
 
-db = SqliteDatabase('mars.db')
+db = SqliteDatabase('E:\\Savage\\craterRepo\\svmCraters\\trainingDataSetUI\\'+'mars.db')
 
 class BaseModel(Model):
 	class Meta:

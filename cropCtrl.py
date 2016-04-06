@@ -2,6 +2,7 @@ import peewee
 from marsSchema import Crop
 import imageUtil
 import imageCtrl
+import os
 # saveCrop(self.project,self.imageInfo,self.imageData,(x,y,w,h))
 # Save crop, first queries imageInfo to figure out whats the next crop id.
 # creates a new crop
@@ -45,7 +46,7 @@ def getCrop(project,parentImage,cropInfo):
 	# returns the crop image
 	name = parentImage.src
 	directory = imageCtrl.getImageDir(name,project)
-	filename = "{0}/{1}".format(directory,cropInfo.src)
+	filename = "{0}{2}{1}".format(directory,cropInfo.src,os.sep)
 	print "loading "+filename
 	imageData,name = imageUtil.loadImage(filename)
 	

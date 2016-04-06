@@ -9,14 +9,14 @@ from sklearn.cross_validation import train_test_split
 import numpy as np
 import fitParameters
 from heatmap import Heatmap
-
+import sys
 
 mlProject = MLProject("Craters")
-
 nameImages = mlProject.listImages()
 mlProject.setImage(nameImages[0])  # 1
 nameCrops = mlProject.listCrops()
 mlProject.setCrop(nameCrops[0]) # 3
+
 
 # print nameCrops[3]
 # exit()
@@ -49,6 +49,7 @@ exit()
 bestFit = [{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 1.0, 'gamma': 0.001},{'C': 10.0, 'gamma': 0.0001}]
 # bestFit = [{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 10.0, 'gamma': 0.001},{'C': 10.0, 'gamma': 0.0001}]
 
+# fetch validation sets
 validationSetX =[]
 validationSetY =[]
 clfs = []
@@ -57,26 +58,28 @@ for size in range(len(bestFit)):
 		print size
 		gamma,C = bestFit[size]['gamma'],bestFit[size]['C']
 		clf = svm.SVC(kernel='rbf',gamma=gamma,C=C,probability=True)
-		images,target = mlProject.getExamples(size)
+		images,target = mlProject.getRotatedExamples(size)
 		X_train, X_validation, y_train, y_validation = train_test_split(images,target,test_size=0.20, random_state=42)
 		clf.fit(X_train,y_train)
 		clfs.append(clf)
 		validationSetX.append(X_validation)
 		validationSetY.append(y_validation)
 	except:
+		import traceback
+		traceback.print_exc()
 		validationSetX.append(None)
 		validationSetY.append(None)
 		clfs.append(None)
 
-
-
+# print validationSetX[0][0].shape
+# exit()
 
 heatmap = Heatmap (clfs,mlProject)
 
-# heatmap.generate(0)
-# heatmap.plot()
-# heatmap.generate(1)
-# heatmap.plot()
+heatmap.generate(0)
+heatmap.plot()
+heatmap.generate(1)
+heatmap.plot()
 
 
 
