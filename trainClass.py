@@ -1,77 +1,47 @@
-import exampleCtrl
-import projectCtrl 
-import classCtrl
+import mlUtil.mlUtil as mlUtil
+from heatmap import Heatmap
 from MLProject import MLProject
 
-# from sklearn import cross_validation
-from sklearn import svm
-from sklearn.cross_validation import train_test_split
-import numpy as np
-import fitParameters
-from heatmap import Heatmap
 import sys
 
 mlProject = MLProject("Craters")
 nameImages = mlProject.listImages()
 mlProject.setImage(nameImages[0])  # 1
-# print nameImages[0]
-# nameCrops = mlProject.listCrops()
-# mlProject.setCrop(nameCrops[0]) # 3
 
-mlProject.rotateExamplesCrater()
-
-# print nameCrops[3]
+# print nameImages
+nameCrops = mlProject.listCrops()
+# print 
+mlProject.setCropAsMainImage()
+# mlProject.setCrop(nameCrops[1]) # 3
+mlProject.getExamplesFromCrop(0)
+X_train, X_validation, y_train, y_validation = mlProject.getTrainTestSplit(0)
+print X_train.shape
 exit()
+# mlProject.setCropAsMainImage()
+
+#  ##mlProject.rotateExamplesCrater()
+
+# print nameCrops
+# exit()
 
 ###########
-'''
-def findBestFit(mlProject):
-	sizes = mlProject.getWindowSizes()
-	bestFit = []
-	print sizes
-	for size in range(len(sizes)):
-		images,target = mlProject.getExamples(size)
-		X_train, X_validation, y_train, y_validation = train_test_split(images,target,test_size=0.20, random_state=42)
-		gamma,c = fitParameters.findBestParametersSV(X_train,y_train)
-		fit = {'gamma':gamma,'C':c}
-		bestFit.append(fit)
-		print bestFit
-	return bestFit
-		
-bestFit = findBestFit(mlProject)
-print bestFit
-exit()
-'''
+
+bestFit = mlUtil.findBestSVMHyperparameters(mlProject)
+# print bestFit
+# exit()
+
 # gamma,c,clf = fitParameters.findBestParametersSV(X_train,y_train)
 
 ###########
 # size = 2
 
 # bestFit = [{'C': 0.01, 'gamma': 1.0000000000000001e-09}, {'C': 1.0, 'gamma': 0.001}, {'C': 1.0, 'gamma': 0.0001}, {'C': 10.0, 'gamma': 1.0000000000000001e-05}]
-bestFit = [{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 1.0, 'gamma': 0.001},{'C': 10.0, 'gamma': 0.0001}]
+# bestFit = [{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 1.0, 'gamma': 0.001},{'C': 10.0, 'gamma': 0.0001}]
 # bestFit = [{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 10.0, 'gamma': 0.001},{'C': 10.0, 'gamma': 0.0001}]
 
-# fetch validation sets
-validationSetX =[]
-validationSetY =[]
-clfs = []
-for size in range(len(bestFit)):
-	try:
-		print size
-		gamma,C = bestFit[size]['gamma'],bestFit[size]['C']
-		clf = svm.SVC(kernel='rbf',gamma=gamma,C=C,probability=True)
-		images,target = mlProject.getRotatedExamples(size)
-		X_train, X_validation, y_train, y_validation = train_test_split(images,target,test_size=0.20, random_state=42)
-		clf.fit(X_train,y_train)
-		clfs.append(clf)
-		validationSetX.append(X_validation)
-		validationSetY.append(y_validation)
-	except:
-		import traceback
-		traceback.print_exc()
-		validationSetX.append(None)
-		validationSetY.append(None)
-		clfs.append(None)
+clfs = mlUtil.getClasifiersForProject(mlProject,bestFit)
+
+# mlUtil.plotPrecisionRecallForProject(mlProject,clfs)
 
 # print validationSetX[0][0].shape
 # exit()
@@ -80,14 +50,12 @@ heatmap = Heatmap (clfs,mlProject)
 
 heatmap.generate(0)
 heatmap.plot()
-heatmap.generate(1)
-heatmap.plot()
+# heatmap.generate(1)
+# heatmap.plot()
 
-
-
-heatmap.generate(2)
-centroids = heatmap.getCentroids()
-heatmap.plot()
+# heatmap.generate(2)
+# centroids = heatmap.getCentroids()
+# heatmap.plot()
 # heatmap.generate(3)
 # heatmap.plot()
 heatmap.show()

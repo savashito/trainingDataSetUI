@@ -5,7 +5,9 @@ import imageCtrl
 import cropCtrl
 import imageUtil
 import numpy as np
-
+from sklearn.cross_validation import train_test_split
+import mlUtil.mlUtil as mlUtil
+from os import sep
 def toGrayScale(image):
 	return image[:,0]
 
@@ -33,7 +35,7 @@ class MLProject:
 		self.sizes = classCtrl.getExampleSizes(None)
 		self.scaler = [None,None,None,None]
 		projectCtrl.updateOutputImageFolder(self.project)
-
+		self.X_train, self.X_validation, self.y_train, self.y_validation = None,None,None,None
 
 	def getExamples_raw(self,sizeIndex):
 		# retrieve class from the project
@@ -49,9 +51,19 @@ class MLProject:
 		size = self.sizes[sizeIndex]
 		lCraterInfo,listCratersImg,listCraterIdentifier  =  exampleCtrl.getExampleSize(project,_class,size)
 		listBackgroundInfo,listBackgroundImg,listBackIdentifier  =  exampleCtrl.getExampleSize(project,classBackground,size)
-
-		return listCraterIdentifier + listBackIdentifier,listCratersImg + listBackgroundImg,lCraterInfo+listBackgroundInfo
-
+		
+		y = mlUtil.toClassSpace(listCraterIdentifier + listBackIdentifier)
+		x = listCratersImg + listBackgroundImg
+		# print y
+		# exit()
+		
+		return y,x,lCraterInfo+listBackgroundInfo
+	def getExamplesFromCrop(self,sizeIndex):
+		_class = classCtrl.getClass("craters")
+		size = self.sizes[sizeIndex]
+		l,listExamples,listClassIdentifier = exampleCtrl.getExampleSizeCrop(self.project,_class,size,self.cropInfo)
+		print len(l)
+		exit()
 	def rotateExamplesCrater(self):
 		sizes = classCtrl.getExampleSizes(None)
 		for sizeIndex in range(len(sizes)):
@@ -78,6 +90,20 @@ class MLProject:
 		X = scaler.fit_transform(listExamplesImages)
 		self.scaler[sizeIndex] = scaler
 		return X,listExamples
+
+	def getTrainTestSplit(self,size):
+		if (self.X_train == None ):
+			images,target = self.getExamples(size)
+			self.X_train, self.X_validation, self.y_train, self.y_validation = train_test_split(images,target,test_size=0.20, random_state=42)
+
+
+		return self.X_train, self.X_validation, self.y_train, self.y_validation
+
+	def getDataNormalizer(self):
+		return self.scaler
+	def setDataNormalizer(self,scaler):
+		self.scaler = scaler
+
 	# adds 3 rotated examples per sample (0,90,180,270)
 	def getRotatedExamples(self,sizeIndex):
 		listExamples,examplesImg,examplesInfo = self.getExamples_raw(sizeIndex)
@@ -130,10 +156,24 @@ class MLProject:
 		imagesName, self.images = imageCtrl.retrieveImages(self.project)
 		return imagesName
 	def setImage(self,imageName):
+		# print imageName
 		self.currentImage = self.images[imageName]
+		name = imageName.split(sep)
+		name = name[len(name)-1]
+		print name
+		# exit()
+		# self.imageInfo = self.currentImage
+		self.imageData,self.imageInfo = imageCtrl.getImage(name,self.project)
+
+		# print self.imageData.shape
+		# exit()
 	def listCrops(self):
 		cropsNames, self.crops = cropCtrl.retrieveCrops(self.project,self.currentImage)
 		return cropsNames
+	def setCropAsMainImage(self):
+		# we have self.currentImage
+		self.cropInfo = self.imageInfo
+		self.cropData = self.imageData
 	def setCrop(self,cropName):
 		self.cropInfo = self.crops[cropName]
 		self.cropData = cropCtrl.getCrop(self.project,self.currentImage,self.cropInfo)
@@ -148,6 +188,7 @@ class MLProject:
 			outWindow.extend(extractLinearArray(cropData,x,y+i,size))
 		# scaler = StandardScaler()
 		flatWindow = np.float64(toGrayScale( np.array(outWindow)).reshape(1, -1))
+		# scale the value!
 		X = self.scaler[sizeIndex].transform(flatWindow)
 		return X
 	def getWindowSizes(self):

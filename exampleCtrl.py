@@ -15,8 +15,8 @@ def insertExample(_class,parentImageInfo,name,rec):
 		)
 
 def saveExampleTransformed(formerExample,imageData,project):
-	print "saving rotated example "+str(formerExample.src)
-	# return saveExample(formerExample._class,project,formerExample.parentCrop,formerExample.rec,imageData):
+	# print "saving rotated example "+str(formerExample.src)
+	return saveExample(formerExample._class,project,formerExample.parentCrop,[formerExample.topLeftX,formerExample.topLeftY,formerExample.bottomRightX,formerExample.bottomRightY],imageData)
 	
 
 # the name is infeared from the next index to insert to db
@@ -96,6 +96,20 @@ def getExampleSize(project,_class,size):
 	print "loaded %d samples of %s, size: %dx%d"%(len(listExamples),_class.name,size,size)
 	# examplesInfo,examplesData,examplesClasses
 	return l,listExamples,listClassIdentifier
+def getExampleSizeCrop(project,_class,size,parentCrop):
+	examples = Example.select().where(Example._class == _class,Example.bottomRightX == size,Example.parentCrop == parentCrop)
+	l = []
+	listExamples = []
+	listClassIdentifier = []
+	for example in examples:
+		l.append(example)
+		image = loadExample(project,_class,example)
+		listExamples.append(image)
+		listClassIdentifier.append(_class.id)
+	print "loaded %d samples of %s, size: %dx%d"%(len(listExamples),_class.name,size,size)
+	# examplesInfo,examplesData,examplesClasses
+	return l,listExamples,listClassIdentifier
+
 
 def getExampleSizeCount(project,_class,sizes):
 	l = []
