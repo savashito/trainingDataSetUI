@@ -474,9 +474,9 @@ class MarsUI:
 			rec[1] = ty+rec[1] 
 			x = rec[0]
 			y = rec[1]
-			tagData = imageUtil.cropImage(self.imageData,x,y,rec[2],rec[3])
-			# tagData = imageUtil.cropImage(self.cropData,rec[0],rec[1],rec[2],rec[3])
-			example = exampleCtrl.saveExample(taggedClass,self.project,self.imageInfo,rec,tagData)
+			imgData = imageUtil.cropImage(self.imageData,x,y,rec[2],rec[3])
+			# imgData = imageUtil.cropImage(self.cropData,rec[0],rec[1],rec[2],rec[3])
+			example = self.saveExampleAndRotate(taggedClass,rec,imgData)
 			# translate back to crop space
 			example = SmallCrop(example.topLeftX,example.topLeftY,example.bottomRightX,example.bottomRightY,example.src)
 			# display the newly crop on the front end
@@ -484,6 +484,17 @@ class MarsUI:
 			# self.tagOverlayManager.drawOverlaws(self.examples)
 			self.tagOverlayManager.drawOverlawsOnCrop(self.cropInfo,self.examples)
 
+	# Rotate example on 4 directions
+	def saveExampleAndRotate(self,taggedClass,rec,imgData):
+		exampleInfo = exampleCtrl.saveExample(taggedClass,self.project,self.imageInfo,rec,imgData)
+		img90 = imageUtil.rotateImage(imgData,90.0)
+		img180 = imageUtil.rotateImage(imgData,180.0)
+		img270 = imageUtil.rotateImage(imgData,270.0)
+		exampleCtrl.saveExampleTransformed(exampleInfo,img90,self.project)
+		exampleCtrl.saveExampleTransformed(exampleInfo,img180,self.project)
+		exampleCtrl.saveExampleTransformed(exampleInfo,img270,self.project)
+		print "Successfully saved and rotated example in 4 directions"
+		return exampleInfo
 
 	def addCombobox(self,fn=None):
 		cbxClass = ttk.Combobox(self.master,width=10)

@@ -3,6 +3,8 @@ import os
 from marsSchema import Image
 import imageUtil # import saveImage3,loadImage
 
+from sklearn.externals import joblib
+
 def insertImages(project,listImages):
 	images = []
 	for image in listImages:
@@ -24,7 +26,30 @@ def insertImages(project,listImages):
 			imageRecord.save()
 			'''
 	return images
-	
+def getScalarPickleName(imgInfo):
+	# print 
+	name = getImageDir(imgInfo.src,imgInfo.project)+os.sep+'scalar_'+imgInfo.src.split('.')[0]+'.pkl'
+	print "getting scalar in :"+name
+	# exit()
+	return name 
+
+def saveScaler(imgInfo,scalar):
+	# save the scalar for all the sizes
+	fname =getScalarPickleName(imgInfo)
+	joblib.dump(scalar, fname) 
+	print "Scalar save succss"
+	# "needs to be implemented"
+
+
+def getScaler(imgInfo):
+	# retrieves the scalar for all the sizes
+	fname =getScalarPickleName(imgInfo)
+	if(os.path.isfile(fname)):
+		scalar = joblib.load(fname)
+	else:
+		scalar = None
+	return scalar
+
 def saveImage(project,img,name,metadata):
 	meta = readMetadata(metadata)
 	imageInfo = None
@@ -66,6 +91,7 @@ def getImage(name,project,path=None,imageInfo=None):
 	if(imageData==None):
 		directory = getImageDir(name,project)
 		filename = "{0}{2}{1}".format(directory,name,os.sep)
+		print "trying to load "+str(filename)
 		imageData,name = imageUtil.loadImage(filename)
 		# imageData,name = imageUtil.loadImageForDisplay(filename)
 		

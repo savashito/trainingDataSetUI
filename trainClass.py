@@ -13,10 +13,10 @@ nameCrops = mlProject.listCrops()
 # print 
 mlProject.setCropAsMainImage()
 # mlProject.setCrop(nameCrops[1]) # 3
-mlProject.getExamplesFromCrop(0)
-X_train, X_validation, y_train, y_validation = mlProject.getTrainTestSplit(0)
-print X_train.shape
-exit()
+# mlProject.getExamplesFromCrop(0)
+# X_train, X_validation, y_train, y_validation = mlProject.getTrainTestSplit(0)
+# print X_train.shape
+# exit()
 # mlProject.setCropAsMainImage()
 
 #  ##mlProject.rotateExamplesCrater()
@@ -26,7 +26,7 @@ exit()
 
 ###########
 
-bestFit = mlUtil.findBestSVMHyperparameters(mlProject)
+bestFit = mlUtil.findBestSVMHyperparameters(mlProject,True)
 # print bestFit
 # exit()
 
@@ -39,8 +39,9 @@ bestFit = mlUtil.findBestSVMHyperparameters(mlProject)
 # bestFit = [{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 1.0, 'gamma': 0.001},{'C': 10.0, 'gamma': 0.0001}]
 # bestFit = [{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 10.0, 'gamma': 0.10000000000000001},{'C': 10.0, 'gamma': 0.001},{'C': 10.0, 'gamma': 0.0001}]
 
-clfs = mlUtil.getClasifiersForProject(mlProject,bestFit)
 
+clfs = mlUtil.getClasifiersForProject(mlProject,bestFit,True)
+# exit()
 # mlUtil.plotPrecisionRecallForProject(mlProject,clfs)
 
 # print validationSetX[0][0].shape
@@ -48,16 +49,18 @@ clfs = mlUtil.getClasifiersForProject(mlProject,bestFit)
 
 heatmap = Heatmap (clfs,mlProject)
 
-heatmap.generate(0)
-heatmap.plot()
+# heatmap.generate(0)
+# heatmap.plot()
 # heatmap.generate(1)
 # heatmap.plot()
 
 # heatmap.generate(2)
-# centroids = heatmap.getCentroids()
+# # centroids = heatmap.getCentroids()
 # heatmap.plot()
-# heatmap.generate(3)
-# heatmap.plot()
+# mlProject.getExamples(3)
+heatmap.generate(3)
+heatmap.plot()
+
 heatmap.show()
 
 

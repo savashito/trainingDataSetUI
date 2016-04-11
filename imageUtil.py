@@ -3,10 +3,13 @@ import matplotlib.image as mpimg
 import os
 import numpy as np
 # import numpy as np
-def loadImage(str):
-	image = cv2.imread(str)
+def loadImage(imgFullName):
+	# print imgFullName
+	image = cv2.imread(imgFullName)
+	# print image.shape
+	# exit()
 	# calc aspect ratio
-	names = str.split('/')
+	names = imgFullName.split(os.sep)
 	name = names[len(names)-1]
 	return image,name
 

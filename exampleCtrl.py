@@ -3,6 +3,7 @@ from marsSchema import Example
 from overlawManager import SmallCrop
 import os
 import imageUtil
+import cropCtrl
 def insertExample(_class,parentImageInfo,name,rec):
 	return Example.create(
 		_class = _class,
@@ -13,7 +14,7 @@ def insertExample(_class,parentImageInfo,name,rec):
 		bottomRightX = rec[2],
 		bottomRightY = rec[3]
 		)
-
+# save a different copy of the examply, in same location but rotated
 def saveExampleTransformed(formerExample,imageData,project):
 	# print "saving rotated example "+str(formerExample.src)
 	return saveExample(formerExample._class,project,formerExample.parentCrop,[formerExample.topLeftX,formerExample.topLeftY,formerExample.bottomRightX,formerExample.bottomRightY],imageData)
@@ -38,7 +39,8 @@ def saveExample(_class,project,parentImageInfo,rec,imageData):
 # def rotateExample(imageData):
 
 
-def loadExample(project,_class,example):
+def loadExample(project,example):
+	_class = example._class
 	sampleName = example.src
 	sampleDir = getExamplesDir(project,_class)
 	sampleFullName = "{0}{2}{1}.png".format(sampleDir,sampleName,os.sep)
@@ -83,29 +85,52 @@ def listExamples(_class):
 	examples = Example.select().where(Example._class == _class)
 	return listify(examples)
 
-def getExampleSize(project,_class,size):
-	examples = Example.select().where(Example._class == _class,Example.bottomRightX == size)
+def getImagesFromExamples(examples,project):
 	l = []
-	listExamples = []
+	listExamplesData = []
 	listClassIdentifier = []
 	for example in examples:
 		l.append(example)
-		image = loadExample(project,_class,example)
-		listExamples.append(image)
-		listClassIdentifier.append(_class.id)
+		image = loadExample(project,example)
+		listExamplesData.append(image)
+		# print "example._class.id "+str(example._class.id)
+		listClassIdentifier.append(example._class.id) 
+	return l,listExamplesData,listClassIdentifier
+
+def getExampleSize(project,_class,size):
+	examples = Example.select().where(Example._class == _class,Example.bottomRightX == size)
+	l,listExamples,listClassIdentifier = getImagesFromExamples(examples,project)
 	print "loaded %d samples of %s, size: %dx%d"%(len(listExamples),_class.name,size,size)
 	# examplesInfo,examplesData,examplesClasses
 	return l,listExamples,listClassIdentifier
+
+# extract examples from imageInfo, 
+# but also examples from each crop belonging to imageInfo
+def getExamplesFromImage(project,_class,size,imageInfo):
+	print "getExamplesFromImage "+imageInfo.src
+	imageName,listImageInfo = cropCtrl.retrieveCrops(project,imageInfo)
+	listImageInfo[imageInfo.src]=imageInfo
+	listExamplesClass,examplesData,examplesInfo = [],[],[]
+	for imageName in listImageInfo:
+		imageInfo = listImageInfo[imageName]
+		examples = Example.select().where(Example._class == _class,Example.bottomRightX == size,Example.parentCrop == imageInfo)
+		# print examples
+		tExamplesInfo,tExamplesData,tClassIdentifier = getImagesFromExamples(examples,project)
+		# print tExamplesInfo
+		# print tClassIdentifier
+		examplesInfo.extend(tExamplesInfo)
+		examplesData.extend(tExamplesData)
+		listExamplesClass.extend(tClassIdentifier)
+	return examplesInfo,examplesData,listExamplesClass
+	# exit(0)
+	
+	# print "crps "+str(listCrps)
+
+
+
 def getExampleSizeCrop(project,_class,size,parentCrop):
 	examples = Example.select().where(Example._class == _class,Example.bottomRightX == size,Example.parentCrop == parentCrop)
-	l = []
-	listExamples = []
-	listClassIdentifier = []
-	for example in examples:
-		l.append(example)
-		image = loadExample(project,_class,example)
-		listExamples.append(image)
-		listClassIdentifier.append(_class.id)
+	l,listExamples,listClassIdentifier = getImagesFromExamples(examples,project)
 	print "loaded %d samples of %s, size: %dx%d"%(len(listExamples),_class.name,size,size)
 	# examplesInfo,examplesData,examplesClasses
 	return l,listExamples,listClassIdentifier
