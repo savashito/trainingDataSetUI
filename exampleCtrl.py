@@ -4,6 +4,7 @@ from overlawManager import SmallCrop
 import os
 import imageUtil
 import cropCtrl
+from debugUtil import debug
 def insertExample(_class,parentImageInfo,name,rec):
 	return Example.create(
 		_class = _class,
@@ -107,7 +108,7 @@ def getExampleSize(project,_class,size):
 # extract examples from imageInfo, 
 # but also examples from each crop belonging to imageInfo
 def getExamplesFromImage(project,_class,size,imageInfo):
-	print "getExamplesFromImage "+imageInfo.src
+	debug("getExamplesFromImage "+"class: "+_class.name+" "+imageInfo.src)
 	imageName,listImageInfo = cropCtrl.retrieveCrops(project,imageInfo)
 	listImageInfo[imageInfo.src]=imageInfo
 	listExamplesClass,examplesData,examplesInfo = [],[],[]

@@ -11,7 +11,7 @@ from os import sep
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from scipy.misc import imresize
-
+from debugUtil import debug
 def toGrayScale(image):
 	return image[:,0]
 
@@ -49,6 +49,8 @@ class MLProject:
 		size = self.sizes[sizeIndex]
 		lCraterInfo,listCratersImg,listCraterIdentifier  =  exampleCtrl.getExamplesFromImage(project,_class,size,imageInfo)
 		listBackgroundInfo,listBackgroundImg,listBackIdentifier  =  exampleCtrl.getExamplesFromImage(project,classBackground,size,imageInfo)
+		debug("Found %d examples of craters"%len(listCraterIdentifier))
+		debug("Found %d examples of background"%len(listBackIdentifier))
 		y = mlUtil.toClassSpace(listCraterIdentifier + listBackIdentifier) #  
 		x = listCratersImg + listBackgroundImg
 		return y,x,lCraterInfo+listBackgroundInfo
@@ -101,14 +103,18 @@ class MLProject:
 		imagesName = self.listImages()
 		X_a = []
 		listExamplesClass_a = []
+		print imagesName
+		print "---------------------------"
 		for imageName in imagesName:
 			# set the correct scaler for the image
 			self.setImage(imageName)
 			listExamplesClass,examplesData,examplesInfo = self.getExamplesFromImage(sizeIndex)
+
 			flatExamplesData = flatenImagesList(examplesData)
 			X = self.normalize(sizeIndex,flatExamplesData)
 			X_a.extend(X)
 			listExamplesClass_a.extend(listExamplesClass)
+			print "----------------"
 			 # self.getExamples_raw(sizeIndex)
 		
 		
@@ -227,13 +233,12 @@ class MLProject:
 		self.currentImage = self.images[imageName]
 		name = imageName.split(sep)
 		name = name[len(name)-1]
-		print name
-		# exit()
+		# print name
 		# self.imageInfo = self.currentImage
 
 		self.imageData,self.imageInfo = imageCtrl.getImage(name,self.project)
-		print "Image loaded: "+self.imageInfo.src
-		print "Image loaded: "+str(self.imageData.shape)
+		# print "Image loaded: "+self.imageInfo.src
+		# print "Image loaded: "+str(self.imageData.shape)
 		self.scaler = imageCtrl.getScaler(self.imageInfo)
 		if(self.scaler == None):
 			# calculate the scaler for the image

@@ -2,7 +2,7 @@ import peewee
 import os
 from marsSchema import Image
 import imageUtil # import saveImage3,loadImage
-
+from debugUtil import debug
 from sklearn.externals import joblib
 
 def insertImages(project,listImages):
@@ -29,7 +29,7 @@ def insertImages(project,listImages):
 def getScalarPickleName(imgInfo):
 	# print 
 	name = getImageDir(imgInfo.src,imgInfo.project)+os.sep+'scalar_'+imgInfo.src.split('.')[0]+'.pkl'
-	print "getting scalar in :"+name
+	debug( "getting scalar in :"+name)
 	# exit()
 	return name 
 
@@ -37,7 +37,7 @@ def saveScaler(imgInfo,scalar):
 	# save the scalar for all the sizes
 	fname =getScalarPickleName(imgInfo)
 	joblib.dump(scalar, fname) 
-	print "Scalar save succss"
+	debug("Scalar save succss")
 	# "needs to be implemented"
 
 
@@ -91,8 +91,9 @@ def getImage(name,project,path=None,imageInfo=None):
 	if(imageData==None):
 		directory = getImageDir(name,project)
 		filename = "{0}{2}{1}".format(directory,name,os.sep)
-		print "trying to load "+str(filename)
+		# print "trying to load "+str(filename)
 		imageData,name = imageUtil.loadImage(filename)
+		debug("Loaded image "+filename)
 		# imageData,name = imageUtil.loadImageForDisplay(filename)
 		
 	# print "imageData "+str(imageData)
@@ -103,7 +104,7 @@ def getImageDir(name,project):
 	l = name.split('.')
 	name = l[0]
 	imageDir = "{0}{2}{1}".format(directory,name,os.sep)
-	print imageDir
+	# print imageDir
 	return imageDir
 def readMetadata(m):
 	return {
@@ -115,7 +116,7 @@ def retrieveImages(project):
 	images = Image.select()
 	l = []
 	listImages = {}
-	print images
+	# print images
 	for image in images:
 		l.append(image.src)
 		listImages[image.src] = image

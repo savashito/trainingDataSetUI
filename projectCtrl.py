@@ -1,6 +1,7 @@
 from marsSchema import Project,initDB
 import peewee
 import os
+from debugUtil import debug
 
 
 def insertProject(name):
@@ -16,7 +17,7 @@ def listProjects():
 def updateOutputImageFolder(project):
 	# print(os.path.dirname(__file__))
 	project.outputImageFolder = os.path.dirname(__file__)+os.sep+"images"
-	print project.outputImageFolder
+	# print project.outputImageFolder
 	project.save()
 def getProject(name):
 	project = None
@@ -27,6 +28,7 @@ def getProject(name):
 		print "Creating new project"
 		project = insertProject(name)
 		print "created project "+project.name
+	debug ("Project %s loaded successfuly"%name)
 	# print "miauu"
 	# print project.get()
 	return project
