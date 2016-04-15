@@ -26,6 +26,10 @@ def insertImages(project,listImages):
 			imageRecord.save()
 			'''
 	return images
+def deleteImageBySrc(name):
+	q = Image.delete().where(Image.src == name) # .where(Example._class == _class.id)
+	q.execute()
+
 def getScalarPickleName(imgInfo):
 	# print 
 	name = getImageDir(imgInfo.src,imgInfo.project)+os.sep+'scalar_'+imgInfo.src.split('.')[0]+'.pkl'
@@ -93,7 +97,7 @@ def getImage(name,project,path=None,imageInfo=None):
 		filename = "{0}{2}{1}".format(directory,name,os.sep)
 		# print "trying to load "+str(filename)
 		imageData,name = imageUtil.loadImage(filename)
-		debug("Loaded image "+filename)
+		debug("Loaded image "+filename+" id "+str(imageInfo.id))
 		# imageData,name = imageUtil.loadImageForDisplay(filename)
 		
 	# print "imageData "+str(imageData)

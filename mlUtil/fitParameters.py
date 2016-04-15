@@ -6,7 +6,7 @@ from sklearn.svm import SVC
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import Normalize
-
+from debugUtil import debug
 class MidpointNormalize(Normalize):
 
     def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
@@ -29,11 +29,12 @@ class MidpointNormalize(Normalize):
 # # shift all the classes down
 # y_2d -= 1
 
-def findBestParametersSV(X,y,scaleData=True,disp=True):
+def findBestParametersSV(X,y,disp=True):
 	# scale the data
-	if(scaleData):
-		scaler = StandardScaler()
-		X = scaler.fit_transform(X)
+
+	# if(scaleData):
+	# 	scaler = StandardScaler()
+	# 	X = scaler.fit_transform(X)
 
 	# X_2d = scaler.fit_transform(X_2d)
 
@@ -43,6 +44,7 @@ def findBestParametersSV(X,y,scaleData=True,disp=True):
 	param_grid = dict(gamma=gamma_range,C=C_range)
 	# Croos validate
 	cv = StratifiedShuffleSplit(y, n_iter=5, test_size=0.2, random_state=42)
+	debug("Initiating grid search")
 	grid = GridSearchCV(SVC(), param_grid=param_grid, cv=cv)
 	grid.fit(X,y)
 	print("The best parameters are %s with a score of %0.2f"

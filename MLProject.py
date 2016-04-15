@@ -114,6 +114,7 @@ class MLProject:
 			X = self.normalize(sizeIndex,flatExamplesData)
 			X_a.extend(X)
 			listExamplesClass_a.extend(listExamplesClass)
+			debug ("Running total examples %d "%len(listExamplesClass_a))
 			print "----------------"
 			 # self.getExamples_raw(sizeIndex)
 		

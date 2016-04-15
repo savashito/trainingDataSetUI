@@ -1,14 +1,18 @@
 import mlUtil.mlUtil as mlUtil
 from heatmap import Heatmap
 from MLProject import MLProject
-
+import imageCtrl
 import sys
+import matplotlib.pyplot as plt
 
 mlProject = MLProject("Craters")
 # list images within the project
 # exit()
 nameImages = mlProject.listImages()
 mlProject.setImage(nameImages[0])  # 1
+
+
+# exit()
 nameCrops = mlProject.listCrops()
 mlProject.setCropAsMainImage()
 
@@ -27,7 +31,7 @@ mlProject.setCropAsMainImage()
 ###########
 
 bestFit = mlUtil.findBestSVMHyperparameters(mlProject,True)
-
+plt.show()
 
 clfs = mlUtil.getClasifiersForProject(mlProject,bestFit,True)
 # exit()

@@ -28,7 +28,6 @@ def findBestSVMHyperparameters(mlProject,recalculate=False):
 			X_train, X_validation, y_train, y_validation = mlProject.getTrainTestSplit(size)
 			debug( "Starting to find best parameters for size "+str(size))
 			gamma,c = fitParameters.findBestParametersSV(X_train,y_train)
-
 			fit = {'gamma':gamma,'C':c}
 			bestFit.append(fit)
 			debug( bestFit)
