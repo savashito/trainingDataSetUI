@@ -39,7 +39,7 @@ def getScalarPickleName(imgInfo):
 
 def saveScaler(imgInfo,scalar):
 	# save the scalar for all the sizes
-	fname =getScalarPickleName(imgInfo)
+	fname = getScalarPickleName(imgInfo)
 	joblib.dump(scalar, fname) 
 	debug("Scalar save succss")
 	# "needs to be implemented"

@@ -42,6 +42,7 @@ def findBestParametersSV(X,y,disp=True):
 	C_range = np.logspace(-2,10,13)
 	gamma_range = np.logspace(-9,3,13)
 	param_grid = dict(gamma=gamma_range,C=C_range)
+	debug("Parameters shapes "+str(X.shape)+" y shape "+str(y.shape))
 	# Croos validate
 	cv = StratifiedShuffleSplit(y, n_iter=5, test_size=0.2, random_state=42)
 	debug("Initiating grid search")
@@ -64,5 +65,5 @@ def findBestParametersSV(X,y,disp=True):
 		plt.xticks(np.arange(len(gamma_range)), gamma_range, rotation=45)
 		plt.yticks(np.arange(len(C_range)), C_range)
 		plt.title('Validation accuracy')
-		plt.show()
+		#plt.show()
 	return gamma,C

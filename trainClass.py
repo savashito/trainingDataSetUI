@@ -7,10 +7,9 @@ import matplotlib.pyplot as plt
 
 mlProject = MLProject("Craters")
 # list images within the project
-# exit()
 nameImages = mlProject.listImages()
 mlProject.setImage(nameImages[0])  # 1
-
+mlProject.loadImage()
 
 # exit()
 nameCrops = mlProject.listCrops()
