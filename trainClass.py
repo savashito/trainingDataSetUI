@@ -29,7 +29,7 @@ mlProject.setCropAsMainImage()
 
 ###########
 
-bestFit = mlUtil.findBestSVMHyperparameters(mlProject,True)
+bestFit = mlUtil.findBestSVMHyperparameters(mlProject,False)
 plt.show()
 
 clfs = mlUtil.getClasifiersForProject(mlProject,bestFit,True)

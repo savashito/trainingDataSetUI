@@ -67,3 +67,5 @@ def findBestParametersSV(X,y,disp=True):
 		plt.title('Validation accuracy')
 		#plt.show()
 	return gamma,C
+
+        # -> [{'C': 100.0, 'gamma': 0.01}, {'C': 10.0, 'gamma': 0.01}, {'C': 10.0, 'gamma': 0.0001}, {'C': 10.0, 'gamma': 1.0000000000000001e-05}]
