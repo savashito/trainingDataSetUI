@@ -127,7 +127,14 @@ def getExamplesFromImage(project,_class,size,imageInfo):
 	
 	# print "crps "+str(listCrps)
 
+def deleteAllExamplesFromImage(project,imageInfo):
+	# Remove from DB
+	q = Example.delete().where(Example.parentCrop == imageInfo) # .where(Example._class == _class.id)
+	# its not necesary to remove the images, they would be overwritten
+	q.execute()
 
+def getAllExamples():
+	return Example.select()
 
 def getExampleSizeCrop(project,_class,size,parentCrop):
 	examples = Example.select().where(Example._class == _class,Example.bottomRightX == size,Example.parentCrop == parentCrop)

@@ -48,8 +48,10 @@ def saveScaler(imgInfo,scalar):
 def getScaler(imgInfo):
 	# retrieves the scalar for all the sizes
 	fname =getScalarPickleName(imgInfo)
+	debug("fetching scalar "+str(fname))
 	if(os.path.isfile(fname)):
 		scalar = joblib.load(fname)
+		# debug("lodad success"+str(scalar))
 	else:
 		scalar = None
 	return scalar
@@ -85,7 +87,7 @@ def getImage(name,project,path=None,imageInfo=None):
 			print "bark bark"
 			# no metadata
 			filename = "{0}{2}{1}".format(path,name,os.sep)
-			print filename
+			# print filename
 			imageData,name = imageUtil.loadImage(filename)
 			# print imageData
 			imageInfo = saveImage(project,imageData,name,readMetadata(filename))
@@ -96,8 +98,10 @@ def getImage(name,project,path=None,imageInfo=None):
 		directory = getImageDir(name,project)
 		filename = "{0}{2}{1}".format(directory,name,os.sep)
 		# print "trying to load "+str(filename)
+		debug("Loaded image "+filename+" id "+str(imageInfo.id) )
 		imageData,name = imageUtil.loadImage(filename)
-		debug("Loaded image "+filename+" id "+str(imageInfo.id))
+		# debug("Loaded image "+filename+" id "+str(imageInfo.id) )
+		debug(" Shape "+str(imageData.shape))
 		# imageData,name = imageUtil.loadImageForDisplay(filename)
 		
 	# print "imageData "+str(imageData)
@@ -105,6 +109,7 @@ def getImage(name,project,path=None,imageInfo=None):
 	return imageData,imageInfo
 def getImageDir(name,project):
 	directory = project.outputImageFolder
+	print directory
 	l = name.split('.')
 	name = l[0]
 	imageDir = "{0}{2}{1}".format(directory,name,os.sep)

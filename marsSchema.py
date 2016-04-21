@@ -1,7 +1,7 @@
 from peewee import *
 
-db = SqliteDatabase('E:\\Savage\\craterRepo\\svmCraters\\trainingDataSetUI\\'+'mars.db')
-
+# db = SqliteDatabase('E:\\Savage\\craterRepo\\svmCraters\\trainingDataSetUI\\'+'mars.db')
+db = MySQLDatabase("mars",user="root",passwd="rtopdfrtio")
 class BaseModel(Model):
 	class Meta:
 		database = db
@@ -54,7 +54,7 @@ def initDB(dbIn = None):
 	# else:
 	db.connect()
 	db.create_tables([Image,Project,Crop,Class,Example],safe=True)
-	print "Database Initialized"
+	print "MySQLDatabase Initialized"
 	return db
 	# listImages = createTestImages()
 	# insertImages(listImages)

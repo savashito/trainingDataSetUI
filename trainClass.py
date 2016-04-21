@@ -4,57 +4,76 @@ from MLProject import MLProject
 import imageCtrl
 import sys
 import matplotlib.pyplot as plt
+from debugUtil import debug
 
-mlProject = MLProject("Craters")
-# list images within the project
-nameImages = mlProject.listImages()
-mlProject.setImage(nameImages[0])  # 1
-mlProject.loadImage()
 
-# exit()
-nameCrops = mlProject.listCrops()
-mlProject.setCropAsMainImage()
+if __name__== "__main__":
+	mlProject = MLProject("Craters")
+	nameImages = mlProject.listImages()
+	mlProject.setImage(nameImages[3])
+	mlProject.deleteAllExamples()
+	debug(nameImages)
+	
 
-# mlProject.setCrop(nameCrops[1]) # 3
-# mlProject.getExamplesFromCrop(0)
-# X_train, X_validation, y_train, y_validation = mlProject.getTrainTestSplit(0)
-# print X_train.shape
-# exit()
-# mlProject.setCropAsMainImage()
+	# bestFit = mlUtil.findBestSVMHyperparameters(mlProject)
+	# clfs = mlUtil.getClasifiersForProject(mlProject,bestFit)
+	# mlUtil.plotPrecisionRecallForProject(mlProject,clfs)
 
-#  ##mlProject.rotateExamplesCrater()
 
-# print nameCrops
-# exit()
+	'''
+	# list images within the project
+	nameImages = mlProject.listImages()
+	debug(nameImages)
+	mlProject.setImage(nameImages[3])  # 1
+	mlProject.loadImage()
 
-###########
+	# exit()
+	nameCrops = mlProject.listCrops()
+	mlProject.setCropAsMainImage()
 
-bestFit = mlUtil.findBestSVMHyperparameters(mlProject,False)
-plt.show()
+	# mlProject.setCrop(nameCrops[0])
+	# mlProject.loadCrop()
+	 # 3
+	# mlProject.setCropAsMainImage()
+	# mlProject.getExamplesFromCrop(0)
+	# X_train, X_validation, y_train, y_validation = mlProject.getTrainTestSplit(0)
+	# print X_train.shape
+	# exit()
+	
 
-clfs = mlUtil.getClasifiersForProject(mlProject,bestFit,True)
-# exit()
-# mlUtil.plotPrecisionRecallForProject(mlProject,clfs)
+	#  ##mlProject.rotateExamplesCrater()
 
-# print validationSetX[0][0].shape
-# exit()
+	# print nameCrops
+	# exit()
 
-heatmap = Heatmap (clfs,mlProject)
+	###########
 
-# heatmap.generate(0)
-# heatmap.plot()
-# heatmap.generate(1)
-# heatmap.plot()
+	# plt.show()
+	
 
-# heatmap.generate(2)
-# # centroids = heatmap.getCentroids()
-# heatmap.plot()
-# mlProject.getExamples(3)
-heatmap.generate(3)
-heatmap.plot()
+	plt.show()
+	# exit()
+	# mlUtil.plotPrecisionRecallForProject(mlProject,clfs)
 
-heatmap.show()
+	# print validationSetX[0][0].shape
+	# exit()
 
+	heatmap = Heatmap (clfs,mlProject)
+
+	heatmap.generate(0)
+	heatmap.plot()
+	heatmap.generate(1)
+	heatmap.plot()
+
+	heatmap.generate(2)
+	# # # centroids = heatmap.getCentroids()
+	heatmap.plot()
+	# # mlProject.getExamples(3)
+	heatmap.generate(3)
+	heatmap.plot()
+
+	heatmap.show()
+	'''
 
 
 

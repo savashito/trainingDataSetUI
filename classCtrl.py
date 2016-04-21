@@ -21,7 +21,8 @@ def getClass(name):
 
 def getExampleSizes(_class):
 	return [16,32,64,128]
-
+def getAllClasses():
+	return Class.select()
 # initDB()
 # cratersProject = getProject("Craters")
 # insertClass("craters",cratersProject)

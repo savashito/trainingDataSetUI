@@ -1,5 +1,4 @@
 
-from sklearn.preprocessing import StandardScaler
 from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.grid_search import GridSearchCV
 from sklearn.svm import SVC
@@ -46,7 +45,7 @@ def findBestParametersSV(X,y,disp=True):
 	# Croos validate
 	cv = StratifiedShuffleSplit(y, n_iter=5, test_size=0.2, random_state=42)
 	debug("Initiating grid search")
-	grid = GridSearchCV(SVC(), param_grid=param_grid, cv=cv)
+	grid = GridSearchCV(SVC(), param_grid=param_grid, cv=cv,n_jobs=32)
 	grid.fit(X,y)
 	print("The best parameters are %s with a score of %0.2f"
 	      % (grid.best_params_, grid.best_score_))

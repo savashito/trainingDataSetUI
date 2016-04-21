@@ -13,6 +13,7 @@ def listProjects():
 	projects = Project.select()
 	for p in projects:
 		print "Project: {0}".format(p.name)
+	return projects
 
 def updateOutputImageFolder(project):
 	# print(os.path.dirname(__file__))

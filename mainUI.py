@@ -10,6 +10,7 @@ import imageCtrl
 import imageUtil
 import cropCtrl
 from projectCtrl import getProject,updateLastLoadedFolder
+import projectCtrl
 import classCtrl
 import exampleCtrl
 
@@ -462,6 +463,8 @@ class MarsUI:
 		self.overlayManager = OverlayManager(self)
 		self.tagOverlayManager = TagOverlayManager(self)
 		self.setClassNumber("craters",[16,32,64],[50,4,35])
+		projectCtrl.updateOutputImageFolder(self.project)
+		print self.project.outputImageFolder
 	def saveExample(self,taggedClass,rec):
 		# need to crop image
 		# but should extract the example from the original image instead of the cropped image
@@ -548,6 +551,7 @@ class MarsUI:
 		if(self.imageInfo != None and imageName==self.imageInfo.src):
 			print "cache the image"
 		else:
+
 			self.imageData,self.imageInfo = imageCtrl.getImage(imageName,self.project,None,imageInfo)
 		self.updateImageDisplay()
 		# load crop combobox

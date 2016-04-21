@@ -52,7 +52,7 @@ def getClasifiersForProject(mlProject,hyperparameters,recalculate=False):
 	validationSetX =[]
 	validationSetY =[]
 	fname = 'clfs.pkl'
-	fNorm = 'normalization.pk1'
+	# fNorm = 'normalization.pk1'
 	# try to load pickle
 	if(os.path.isfile(fname) and recalculate == False):
 		clfs = joblib.load(fname)
@@ -89,7 +89,7 @@ def getClasifiersForProject(mlProject,hyperparameters,recalculate=False):
 				validationSetY.append(None)
 				# clfs.append(None)
 		joblib.dump(clfs, fname) 
-		joblib.dump(mlProject.getDataNormalizer(), fNorm) 
+		# joblib.dump(mlProject.getDataNormalizer(), fNorm) 
 
 
 	return clfs

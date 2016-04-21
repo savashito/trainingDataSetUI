@@ -51,6 +51,8 @@ def getCrop(project,parentImage,cropInfo):
 	imageData,name = imageUtil.loadImage(filename)
 	
 	return imageData
+def getAllCrops():
+	return Crop.select()
 	'''
 	try:
 		Crop.create(src=name,

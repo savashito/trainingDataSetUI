@@ -77,7 +77,11 @@ class MLProject:
 
 
 		
-	
+	def getAllWindowsFromImage(self,sizeIndex):
+		size = self.sizes[sizeIndex]
+		# if(self.imageData==None):
+		self.loadImage()
+		return scalarCtrl.getAllWindowsFromImage(size,self.imageData)
 	def normalize(self,sizeIndex,examples):
 		return self.scaler[sizeIndex].transform(examples)
 
@@ -89,18 +93,26 @@ class MLProject:
 		#X = self.normalize(sizeIndex,flatWindow)
 		size = self.sizes[sizeIndex]
 		window = scalarCtrl.getWindowFromImage(size,x,y,self.cropData)
-		return self.normilize(sizeIndex,window)
+		return self.normalize(sizeIndex,window)
 		# remember to normilize each window extracted
 		
 	# update the scalar for the current image transformation
-	def updateScalar(self):
+	def updateScalar(self,recalc=False):
+
 		self.scaler = imageCtrl.getScaler(self.imageInfo)
-		if(self.scaler == None):
+		print self.scaler
+		print recalc
+		# exit()
+		if(self.scaler == None or recalc):
+			debug( self.imageData)
+			if(self.imageData==None):
+				self.loadImage()
 			# calculate the scaler for the image
 			self.scaler = scalarCtrl.calculateScalerForImage(self.sizes,self.imageData)
 			imageCtrl.saveScaler(self.imageInfo,self.scaler)
 
-
+	def deleteAllExamplesFromImage(self):
+		exampleCtrl.deleteAllExamplesFromImage(self.project,self.imageInfo)
 	def setCropAsMainImage(self):
 		# we have self.currentImage
 		self.cropInfo = self.imageInfo
