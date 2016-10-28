@@ -40,7 +40,7 @@ def updateLastLoadedFolder(proj,path):
 # def initTestProject():
 	# print "creating test Project"
 
-# initDB()
+initDB()
 # print getProject("Craters").name
 #  listProjects()
 # insertProject("Craters")

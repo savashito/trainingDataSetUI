@@ -56,7 +56,7 @@ def getScaler(imgInfo):
 		scalar = None
 	return scalar
 
-def saveImage(project,img,name,metadata):
+def saveImage(project,img,name,metadata,update=False):
 	meta = readMetadata(metadata)
 	imageInfo = None
 
@@ -71,6 +71,8 @@ def saveImage(project,img,name,metadata):
 	except peewee.IntegrityError:
 		print "Key exists: "+name
 		imageInfo = Image.select().where(Image.src==name).get()
+		if(update==False):
+			return imageInfo
 	directory = getImageDir(name,project)
 	print 'Dir: '+directory
 	# save image to HD
@@ -87,7 +89,7 @@ def getImage(name,project,path=None,imageInfo=None):
 			print "bark bark"
 			# no metadata
 			filename = "{0}{2}{1}".format(path,name,os.sep)
-			# print filename
+			print "loading image "+filename
 			imageData,name = imageUtil.loadImage(filename)
 			# print imageData
 			imageInfo = saveImage(project,imageData,name,readMetadata(filename))

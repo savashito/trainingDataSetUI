@@ -21,3 +21,15 @@ def generateTestImages(names):
 def generate1DTestImage(w,h):
 	a = np.arange(w*h).reshape(w,h)
 	return np.array([a,a,a]).T
+
+def generate2DTestImage(w,h):
+	a = np.ones(w*h).reshape(w,h)
+	# np.arange([w,h])
+	print a.shape
+	return a# np.array([a,a]).T
+
+def generate2DTestImageIncs(w,h):
+	a = np.arange(w*h).reshape(w,h)
+	# np.arange([w,h])
+	# print a.shape
+	return a# np.array([a,a]).T

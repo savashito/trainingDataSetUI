@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import Normalize
 from debugUtil import debug
+from os import sep
+
 class MidpointNormalize(Normalize):
 
     def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
@@ -28,6 +30,8 @@ class MidpointNormalize(Normalize):
 # # shift all the classes down
 # y_2d -= 1
 
+C_range = np.logspace(-2,10,13)
+gamma_range = np.logspace(-9,3,13)		
 def findBestParametersSV(X,y,disp=True):
 	# scale the data
 
@@ -38,33 +42,36 @@ def findBestParametersSV(X,y,disp=True):
 	# X_2d = scaler.fit_transform(X_2d)
 
 	# search over the entire space
-	C_range = np.logspace(-2,10,13)
-	gamma_range = np.logspace(-9,3,13)
+
 	param_grid = dict(gamma=gamma_range,C=C_range)
 	debug("Parameters shapes "+str(X.shape)+" y shape "+str(y.shape))
 	# Croos validate
+	print y
 	cv = StratifiedShuffleSplit(y, n_iter=5, test_size=0.2, random_state=42)
 	debug("Initiating grid search")
-	grid = GridSearchCV(SVC(), param_grid=param_grid, cv=cv,n_jobs=32)
+	grid = GridSearchCV(SVC(), param_grid=param_grid, cv=cv,n_jobs=11)
 	grid.fit(X,y)
+	return grid
+def saveGrid(grid,size,typeStr):
 	print("The best parameters are %s with a score of %0.2f"
 	      % (grid.best_params_, grid.best_score_))
 	gamma, C = grid.best_params_['gamma'],grid.best_params_['C']
 	scores = [x[1] for x in grid.grid_scores_]
 	scores = np.array(scores).reshape(len(C_range), len(gamma_range))
 
-	if(disp):
-		plt.figure(figsize=(8, 6))
-		plt.subplots_adjust(left=.2, right=0.95, bottom=0.15, top=0.95)
-		plt.imshow(scores, interpolation='nearest', cmap=plt.cm.hot,
-		           norm=MidpointNormalize(vmin=0.2, midpoint=0.92))
-		plt.xlabel('gamma')
-		plt.ylabel('C')
-		plt.colorbar()
-		plt.xticks(np.arange(len(gamma_range)), gamma_range, rotation=45)
-		plt.yticks(np.arange(len(C_range)), C_range)
-		plt.title('Validation accuracy')
+	plt.figure(figsize=(8, 6))
+	plt.subplots_adjust(left=.2, right=0.95, bottom=0.15, top=0.95)
+	plt.imshow(scores, interpolation='nearest', cmap=plt.cm.hot,
+	           norm=MidpointNormalize(vmin=0.2, midpoint=0.92))
+	plt.xlabel('gamma')
+	plt.ylabel('C')
+	plt.colorbar()
+	plt.xticks(np.arange(len(gamma_range)), gamma_range, rotation=45)
+	plt.yticks(np.arange(len(C_range)), C_range)
+	plt.title('Validation accuracy')
+
+	plt.savefig('results%sgridSearch_%d_%s.png'%(sep,size,typeStr))
 		#plt.show()
-	return gamma,C
+	return gamma,C,grid.best_score_
 
         # -> [{'C': 100.0, 'gamma': 0.01}, {'C': 10.0, 'gamma': 0.01}, {'C': 10.0, 'gamma': 0.0001}, {'C': 10.0, 'gamma': 1.0000000000000001e-05}]

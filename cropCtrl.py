@@ -32,6 +32,11 @@ def insertCrop(name,imageInfo,rec):
 		cropBottomRightY = rec[3]
 		)
 
+def deleteCropsFromImage(project,imageInfo):
+	q = Crop.delete().where(Crop.originalImage == imageInfo.id) # .where(Example._class == _class.id)
+	# its not necesary to remove the images, they would be overwritten
+	q.execute()
+
 def retrieveCrops(project,image):
 	crops = Crop.select().where(Crop.originalImage==image.id)
 	l = []

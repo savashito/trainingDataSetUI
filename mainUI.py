@@ -118,11 +118,11 @@ class Square():
 		self.lock.release()
 
 def isInt(s):
-    try: 
-        int(s)
-        return True
-    except ValueError:
-        return False
+	try: 
+		int(s)
+		return True
+	except ValueError:
+		return False
 class TagSquare():
 	def __init__(self,marsUI):
 		self.marsUI = marsUI
@@ -335,6 +335,8 @@ class OnHover(object):
 		self.clickLock = Lock()
 	def __call__(self, event):
 		self.canvas._tkcanvas.focus_set()
+		
+
 		# self.canvas.takefocus = True
 		if (event.key!=None):
 			self.tagSqr.keyEvent(event.key)
@@ -359,6 +361,12 @@ class OnHover(object):
 	def getMaskSize(self):
 		return self.tagSqr.getDisplaySize()
 
+class OnHoverResize(OnHover):
+	def __init__(self,marsUI, c,fig,ax, cursor='hand1'):
+		super(OnHoverResize,self).__init__(marsUI, c,fig,ax, cursor)
+	
+	def __call__(self, event):
+		print event.width,event.height
 		'''
 		if(event.button==1):
 			canvas.draw()
@@ -395,7 +403,6 @@ class MarsUI:
 		# Load and crop image buttons
 		self.btnLoadImage = Button(master, text="Load image", cursor="plus",command=self.openImageDialog)
 		self.btnCropImage = Button(master, text="Crop image", command=self.cropImage)
-		
 		# class dropdowns
 		self.cbxClass = self.addCombobox(self.classSelected)
 		self.cbxImage = self.addCombobox(self.imageSelected)
@@ -427,14 +434,24 @@ class MarsUI:
 		# LAYOUT
 		# tkagg.cursord[cursors.POINTER] = 'coffee_mug' 
 		f,ax = plt.subplots()# plt.figure(1)
-		f.tight_layout(pad=0.1) 
+		f.tight_layout(pad=0.0) 
+		# plt.Figure(figsize=(20, 3))
 		# for item in [f, ax]:
 		# 	item.patch.set_visible(False)
 		self.canvas = FigureCanvasTkAgg(f, master=self.master)
-		self.canvas.get_tk_widget().grid(row=0,column=0,columnspan=12) # .pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
+		canvasWidget = self.canvas.get_tk_widget()
+		canvasWidget.grid(row=0,column=0,columnspan=12) # .pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
+		canvasWidget.config(width=1600, height=1200)
 		# cursor
 		self.ax = ax
 		self.eventManager = OnHover(self,self.canvas,f,ax)
+		hoverResize = OnHoverResize(self,self.canvas,f,ax)
+		# master.mpl_connect('resize_event',hoverResize)
+		# self.canvas.config(width=1024, height=1024)
+		# rescale all the objects tagged with the "all" tag
+		# self.scale("all",0,0,wscale,hscale)
+
+		self.canvas.mpl_connect('resize_event',hoverResize)
 		self.canvas.mpl_connect('button_press_event',self.eventManager)
 		self.canvas.mpl_connect('motion_notify_event', self.eventManager)
 		self.canvas.mpl_connect('key_press_event', self.eventManager)
@@ -489,13 +506,16 @@ class MarsUI:
 
 	# Rotate example on 4 directions
 	def saveExampleAndRotate(self,taggedClass,rec,imgData):
-		exampleInfo = exampleCtrl.saveExample(taggedClass,self.project,self.imageInfo,rec,imgData)
-		img90 = imageUtil.rotateImage(imgData,90.0)
-		img180 = imageUtil.rotateImage(imgData,180.0)
-		img270 = imageUtil.rotateImage(imgData,270.0)
-		exampleCtrl.saveExampleTransformed(exampleInfo,img90,self.project)
-		exampleCtrl.saveExampleTransformed(exampleInfo,img180,self.project)
-		exampleCtrl.saveExampleTransformed(exampleInfo,img270,self.project)
+		exampleInfo = exampleCtrl.rotateExampleAndSave(taggedClass,self.project,self.imageInfo,rec,imgData)
+
+		# exampleInfo = exampleCtrl.saveExample(taggedClass,self.project,self.imageInfo,rec,imgData)
+		# img90 = imageUtil.rotateImage(imgData,90.0)
+		# img180 = imageUtil.rotateImage(imgData,180.0)
+		# img270 = imageUtil.rotateImage(imgData,270.0)
+		# exampleCtrl.saveExampleTransformed(exampleInfo,img90,self.project)
+		# exampleCtrl.saveExampleTransformed(exampleInfo,img180,self.project)
+		# exampleCtrl.saveExampleTransformed(exampleInfo,img270,self.project)
+		
 		print "Successfully saved and rotated example in 4 directions"
 		return exampleInfo
 
@@ -634,7 +654,7 @@ class MarsUI:
 		# path,name = filename.split(":")
 		# print "Path {0} name {1} ".format(path,name)
 	def updateImageDisplay(self):
-		plt.imshow(self.imageData)
+		self.ax.imshow(self.imageData,interpolation='nearest', aspect='auto')
 		self.canvas.show()
 		#Window changes
 		self.setImageName(self.imageInfo.src )
